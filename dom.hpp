@@ -7,13 +7,43 @@
 
 using namespace std;
 
-typedef unordered_map<string, string> AttributeMap;
-
-struct Element {
-  string tag;
-  AttributeMap attributes;
-};
-
 enum TypeEnum { ELEMENT, TEXT };
 
-#endif
+class NodeBase {
+protected:
+  vector<NodeBase *> children;
+  TypeEnum type_enum;
+
+public:
+  NodeBase(TypeEnum type_enum);
+  virtual ~NodeBase();
+
+  void add_child(NodeBase *child);
+
+  virtual string to_string() const;
+
+  static void print(NodeBase *node);
+};
+
+class TextNode : public NodeBase {
+public:
+  string type_data;
+
+  TextNode(const string &text);
+
+  string to_string() const override;
+};
+
+class ElementNode : public NodeBase {
+public:
+  typedef unordered_map<string, string> AttributeMap;
+
+  string tag;
+  AttributeMap attributes;
+
+  ElementNode(const string &tag, const AttributeMap &attributes);
+
+  string to_string() const override;
+};
+
+#endif // !DOM_HPP

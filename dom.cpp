@@ -1,16 +1,54 @@
 #include "dom.hpp"
+#include <iostream>
+#include <tuple>
 
-template <typename T> class Node {
-public:
-  vector<Node *> children;
-  TypeEnum type_enum;
-  T type_data;
+void NodeBase::add_child(NodeBase *child) { children.push_back(child); }
 
-  Node(const string &text) : type_enum(TEXT), type_data(text) {}
+string NodeBase::to_string() const { return ""; }
 
-  Node(const Element &element) : type_enum(ELEMENT), type_data(element) {}
+void NodeBase::print(NodeBase *node) {
+  if (NULL == node) {
+    cerr << "Given node is empty" << endl;
+    return;
+  }
 
-  void add_child(Node *child) { this->children.push_back(child); }
-};
+  int level = -1;
+  tuple<NodeBase *, int> head(node, 0);
+  vector<tuple<NodeBase *, int>> frontier = {head};
+  while (!frontier.empty()) {
+    tuple<NodeBase *, int> removed = frontier.front();
+    NodeBase *removed_nb = get<0>(removed);
+
+    frontier.erase(frontier.begin());
+
+    string res = removed_nb->to_string();
+
+    if (level < get<1>(removed)) {
+      res = "\n" + res;
+      level = get<1>(removed);
+    }
+    cout << res << "  ";
+
+    if (!(removed_nb->children.empty())) {
+      for (NodeBase *nb : removed_nb->children) {
+        tuple<NodeBase *, int> tuple(nb, level + 1);
+        frontier.push_back(tuple);
+      }
+    }
+  }
+}
+
+NodeBase::NodeBase(TypeEnum type_enum) : type_enum(type_enum) {}
+
+NodeBase::~NodeBase() {}
+
+TextNode::TextNode(const string &text) : NodeBase(TEXT), type_data(text) {}
+
+string TextNode::to_string() const { return "{TEXT, data: " + type_data + "}"; }
+
+ElementNode::ElementNode(const string &tag, const AttributeMap &attributes)
+    : NodeBase(ELEMENT), tag(tag), attributes(attributes) {}
+
+string ElementNode::to_string() const { return "{ELEMENT, data: " + tag + "}"; }
 
 int main(void) { return 0; }

@@ -2,6 +2,6 @@
 
 set -xe
 
-g++ dom.cpp -o dom
+g++ dom.cpp parser.cpp -o dom
 
 ./dom

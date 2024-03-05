@@ -1,11 +1,14 @@
 #include "dom.hpp"
 #include <iostream>
-#include <tuple>
+
+NodeBase::NodeBase(TypeEnum type_enum) : type_enum(type_enum) {}
+NodeBase::~NodeBase() {}
 
 void NodeBase::add_child(NodeBase *child) { children.push_back(child); }
 
 string NodeBase::to_string() const { return ""; }
 
+// BFS to print the DOM tree
 void NodeBase::print(NodeBase *node) {
   if (NULL == node) {
     cerr << "Given node is empty" << endl;
@@ -15,6 +18,7 @@ void NodeBase::print(NodeBase *node) {
   int level = -1;
   tuple<NodeBase *, int> head(node, 0);
   vector<tuple<NodeBase *, int>> frontier = {head};
+
   while (!frontier.empty()) {
     tuple<NodeBase *, int> removed = frontier.front();
     NodeBase *removed_nb = get<0>(removed);
@@ -38,10 +42,6 @@ void NodeBase::print(NodeBase *node) {
   }
 }
 
-NodeBase::NodeBase(TypeEnum type_enum) : type_enum(type_enum) {}
-
-NodeBase::~NodeBase() {}
-
 TextNode::TextNode(const string &text) : NodeBase(TEXT), type_data(text) {}
 
 string TextNode::to_string() const { return "{TEXT, data: " + type_data + "}"; }
@@ -50,5 +50,3 @@ ElementNode::ElementNode(const string &tag, const AttributeMap &attributes)
     : NodeBase(ELEMENT), tag(tag), attributes(attributes) {}
 
 string ElementNode::to_string() const { return "{ELEMENT, data: " + tag + "}"; }
-
-int main(void) { return 0; }

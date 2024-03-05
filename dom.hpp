@@ -34,10 +34,10 @@ public:
   string to_string() const override;
 };
 
+typedef unordered_map<string, string> AttributeMap;
+
 class ElementNode : public NodeBase {
 public:
-  typedef unordered_map<string, string> AttributeMap;
-
   string tag;
   AttributeMap attributes;
 

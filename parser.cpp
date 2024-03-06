@@ -45,10 +45,76 @@ pair<string, string> get_key_value(string &statement) {
   }
 }
 
-ElementNode read_element(string &input, int &pos, vector<string> &tags) {
-  throw runtime_error("TODO");
+ElementNode *read_element(string &input, int &pos, vector<string> &tags) {
+  if (input[pos] != '<') {
+    throw runtime_error("Element has to start with a <");
+  }
+
+  pos++;
+
+  if (' ' == input[pos]) {
+    throw runtime_error("No whitespace allowed after <");
+  }
+
+  string tag = "";
+
+  // Try to find the tag
+  while (pos < input.size()) {
+    if ('>' == input[pos]) {
+      // Only found a single tag without any attributes
+      tags.push_back(tag);
+      pos++;
+      return new (malloc(sizeof(ElementNode))) ElementNode(tag);
+    }
+
+    if (' ' == input[pos]) {
+      // Found tag so break to get attributes
+      tags.push_back(tag);
+      pos++;
+      break;
+    }
+    tag += input[pos];
+    pos++;
+  }
+
+  if (input.size() == pos) {
+    throw runtime_error("Invalid html element");
+  }
+
+  // Try to find attributes
+  AttributeMap map;
+  string attr = "";
+  while (pos < input.size()) {
+    if ('>' == input[pos]) {
+      if (!attr.empty()) {
+        pair<string, string> key_value = get_key_value(attr);
+        map.insert(key_value);
+      }
+      pos++;
+      return new (malloc(sizeof(ElementNode))) ElementNode(tag);
+    }
+
+    if (' ' != input[pos]) {
+      attr += input[pos];
+    } else {
+      if (!attr.empty()) {
+        pair<string, string> key_value = get_key_value(attr);
+        map.insert(key_value);
+        attr = "";
+      }
+    }
+    pos++;
+  }
+  throw runtime_error("Invalid html element");
 }
 
-NodeBase parse(string &input) { throw runtime_error("TODO"); }
+NodeBase *parse(string &input) {}
 
-int main(void) { return 0; }
+int main(void) {
+  string value = "<html><body>Hello, world!</body></html>";
+  vector<string> tags;
+  int pos = 0;
+  NodeBase *res = parse(value);
+  NodeBase::print(res);
+  return 0;
+}

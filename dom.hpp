@@ -41,7 +41,9 @@ public:
   string tag;
   AttributeMap attributes;
 
+  ElementNode(const string &tag);
   ElementNode(const string &tag, const AttributeMap &attributes);
+  ~ElementNode();
 
   string to_string() const override;
 };

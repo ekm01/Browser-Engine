@@ -1,5 +1,6 @@
 #include "dom.hpp"
 #include <iostream>
+#include <utility>
 
 NodeBase::NodeBase(TypeEnum type_enum) : type_enum(type_enum) {}
 NodeBase::~NodeBase() {}
@@ -46,7 +47,15 @@ TextNode::TextNode(const string &text) : NodeBase(TEXT), type_data(text) {}
 
 string TextNode::to_string() const { return "{TEXT, data: " + type_data + "}"; }
 
+ElementNode::ElementNode(const string &tag) : NodeBase(ELEMENT), tag(tag) {}
 ElementNode::ElementNode(const string &tag, const AttributeMap &attributes)
     : NodeBase(ELEMENT), tag(tag), attributes(attributes) {}
+ElementNode::~ElementNode() {}
 
-string ElementNode::to_string() const { return "{ELEMENT, data: " + tag + "}"; }
+string ElementNode::to_string() const {
+  string attrs = "";
+  for (pair<string, string> p : attributes) {
+    attrs += "(" + p.first + ";" + p.second + ")" + ",";
+  }
+  return "{ELEMENT, tag: " + tag + ", " + "attributes: [" + attrs + "]" + "}";
+}

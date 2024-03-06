@@ -10,11 +10,11 @@ using namespace std;
 enum TypeEnum { ELEMENT, TEXT };
 
 class NodeBase {
-protected:
+  
+public:
   vector<NodeBase *> children;
   TypeEnum type_enum;
 
-public:
   NodeBase(TypeEnum type_enum);
   virtual ~NodeBase();
 

@@ -45,7 +45,7 @@ pair<string, string> get_key_value(string &statement) {
   }
 }
 
-ElementNode *read_element(string &input, int &pos, vector<string> &tags) {
+ElementNode *read_element(string &input, int &pos) {
   if (input[pos] != '<') {
     throw runtime_error("Element has to start with a <");
   }
@@ -62,14 +62,17 @@ ElementNode *read_element(string &input, int &pos, vector<string> &tags) {
   while (pos < input.size()) {
     if ('>' == input[pos]) {
       // Only found a single tag without any attributes
-      tags.push_back(tag);
       pos++;
+      if (tag.find('/') == 0)
+      {
+        tag = tag.substr(1);
+      }
+      
       return new (malloc(sizeof(ElementNode))) ElementNode(tag);
     }
 
     if (' ' == input[pos]) {
       // Found tag so break to get attributes
-      tags.push_back(tag);
       pos++;
       break;
     }
@@ -80,6 +83,11 @@ ElementNode *read_element(string &input, int &pos, vector<string> &tags) {
   if (input.size() == pos) {
     throw runtime_error("Invalid html element");
   }
+
+  if (tag.find('/') == 0)
+      {
+        tag = tag.substr(1);
+      }
 
   // Try to find attributes
   AttributeMap map;
@@ -108,13 +116,27 @@ ElementNode *read_element(string &input, int &pos, vector<string> &tags) {
   throw runtime_error("Invalid html element");
 }
 
-NodeBase *parse(string &input) {}
+NodeBase *parse(string &input, ElementNode* root, int pos, string &text) {
+   ElementNode* node = read_element(input, pos);
+   if (node->tag == root->tag)
+   {
+    node->~ElementNode();
+    free(node);
+    return root;
+   }
+
+   root->add_child(node);
+
+   return parse(input, node, pos, text);
+}
 
 int main(void) {
-  string value = "<html><body>Hello, world!</body></html>";
+  string value = "<html><body></body></html>";
   vector<string> tags;
   int pos = 0;
-  NodeBase *res = parse(value);
-  NodeBase::print(res);
+  ElementNode root("");
+  string text = "";
+  NodeBase *res = parse(value, &root, pos, text);
+  NodeBase::print(&root);
   return 0;
 }

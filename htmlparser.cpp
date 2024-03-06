@@ -112,8 +112,8 @@ int only_space_or_newline(string &str) {
   return 1;
 }
 
-NodeBase *parse(string &input, ElementNode *root, int &pos, string &text,
-                vector<string> &tags) {
+NodeBase *parse_aux(string &input, ElementNode *root, int &pos, string &text,
+                    vector<string> &tags) {
   while (pos < input.size() && input[pos] != '<') {
     text += input[pos];
     pos++;
@@ -134,26 +134,32 @@ NodeBase *parse(string &input, ElementNode *root, int &pos, string &text,
   }
   tags.push_back(node->tag);
 
-  ElementNode *child = (ElementNode *)parse(input, node, pos, text, tags);
+  ElementNode *child = (ElementNode *)parse_aux(input, node, pos, text, tags);
   root->add_child(child);
 
   if (tags.size() != 0) {
-    return parse(input, root, pos, text, tags);
+    return parse_aux(input, root, pos, text, tags);
   }
   return root;
 }
 
-/*int main(void) {
+NodeBase *parse(string &input) {
+  ElementNode root("");
+  string text = "";
+  vector<string> tags;
+  int pos = 0;
+  NodeBase *res = parse_aux(input, &root, pos, text, tags);
+  return res->children[0];
+}
+
+int main(void) {
   string value =
       "<html\n        >\n\n\n<body>                 \n      <h1>Title</h1><div "
       "id=\"main\"      test=\"test1\"       \n  \n\n  "
       "\nclass=\"test\"><p>Hello "
-      "<em>world<test>344<a></a></test></em>!</p></div></body></html>";
-  vector<string> tags;
-  int pos = 0;
-  ElementNode root("");
-  string text = "";
-  NodeBase *res = parse(value, &root, pos, text, tags);
-  NodeBase::print(root.children[0]);
+      "<em>world<test>42<a></a>kfka fdakf "
+      "a</test></em>!</p></div></body></html>";
+  NodeBase *res = parse(value);
+  NodeBase::print(res);
   return 0;
-}*/
+}

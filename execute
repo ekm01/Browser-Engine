@@ -2,6 +2,6 @@
 
 set -xe
 
-g++ dom.cpp htmlparser.cpp -o dom
+g++ src/*.cpp -o dom
 
 ./dom

@@ -30,6 +30,7 @@ pair<string, string> get_key_value(string &statement) {
     if (!is_valid_value(value)) {
       throw runtime_error("Unexpected attribute value");
     }
+    value = value.substr(1, value.size() - 2);
     return make_pair(key, value);
   } else {
     throw runtime_error("Unexpected attribute assignment");

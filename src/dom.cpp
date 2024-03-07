@@ -1,6 +1,5 @@
 #include "dom.hpp"
 #include <iostream>
-#include <utility>
 
 NodeBase::NodeBase(TypeEnum type_enum) : type_enum(type_enum) {}
 NodeBase::~NodeBase() {}
@@ -43,7 +42,19 @@ void NodeBase::print(NodeBase *node) {
   }
 }
 
+void NodeBase::free_node(NodeBase *node) {
+  if (nullptr == node) {
+    return;
+  }
+
+  for (int i = 0; i < node->children.size(); ++i) {
+    free_node(node->children[i]);
+  }
+  delete node;
+}
+
 TextNode::TextNode(const string &text) : NodeBase(TEXT), type_data(text) {}
+TextNode::~TextNode() {}
 
 string TextNode::to_string() const { return "{TEXT, data: " + type_data + "}"; }
 

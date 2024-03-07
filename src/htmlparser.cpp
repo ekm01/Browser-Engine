@@ -1,4 +1,5 @@
 #include "dom.hpp"
+#include <cstdlib>
 #include <iostream>
 
 int is_valid_value(const string &value) {
@@ -127,8 +128,7 @@ NodeBase *parse_aux(string &input, ElementNode *root, int &pos, string &text,
   ElementNode *node = read_element(input, pos);
 
   if (node->tag == root->tag) {
-    node->~ElementNode();
-    free(node);
+    NodeBase::free_node(node);
     tags.pop_back();
     return root;
   }
@@ -148,8 +148,8 @@ NodeBase *parse(string &input) {
   string text = "";
   vector<string> tags;
   int pos = 0;
-  NodeBase *res = parse_aux(input, &root, pos, text, tags);
-  return res->children[0];
+  NodeBase *temp_result = parse_aux(input, &root, pos, text, tags);
+  return temp_result->children[0];
 }
 
 int main(void) {
@@ -161,5 +161,6 @@ int main(void) {
       "a</test></em>!</p></div></body></html>";
   NodeBase *res = parse(value);
   NodeBase::print(res);
+  NodeBase::free_node(res);
   return 0;
 }

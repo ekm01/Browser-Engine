@@ -10,7 +10,7 @@ using namespace std;
 enum TypeEnum { ELEMENT, TEXT };
 
 class NodeBase {
-  
+
 public:
   vector<NodeBase *> children;
   TypeEnum type_enum;
@@ -23,6 +23,8 @@ public:
   virtual string to_string() const;
 
   static void print(NodeBase *node);
+
+  static void free_node(NodeBase *node);
 };
 
 class TextNode : public NodeBase {
@@ -30,6 +32,7 @@ public:
   string type_data;
 
   TextNode(const string &text);
+  ~TextNode();
 
   string to_string() const override;
 };

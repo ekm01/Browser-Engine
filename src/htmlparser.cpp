@@ -1,5 +1,4 @@
 #include "dom.hpp"
-#include <cstdlib>
 #include <iostream>
 
 int is_valid_value(const string &value) {
@@ -153,15 +152,14 @@ NodeBase *parse(string &input) {
   return temp_result->children[0];
 }
 
-int main(void) {
+/*int main(void) {
   string value =
       "<html\n        >\n\n\n<body>                 \n      <h1>Title</h1><div "
       "id=\"main\"      test=\"test1\"       \n  \n\n  "
-      "\nclass=\"test\"><p>Hello "
-      "<em>world<test>42<a></a>kfka fdakf "
-      "a</test></em>!</p></div></body></html>";
+      "\nclass=\"test\"><p id=\"para1\">Hello World!</p> "
+      "</div></body></html>";
   NodeBase *res = parse(value);
   NodeBase::print(res);
   NodeBase::free_node(res);
   return 0;
-}
+}*/

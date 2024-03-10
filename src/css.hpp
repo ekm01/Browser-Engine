@@ -1,83 +1,73 @@
 #ifndef CSS_HPP
 #define CSS_HPP
 
+#include <optional>
 #include <string>
 #include <vector>
-#include <optional>
 
 using namespace std;
 
-class Value
-{
+class Value {
 public:
-    virtual ~Value();
+  virtual ~Value();
 
-    virtual float to_px() const;
+  virtual float to_px() const;
 };
 
-class Keyword : public Value
-{
+class Keyword : public Value {
 public:
-    string keyword;
+  string keyword;
 
-    Keyword(string &keyword);
-    ~Keyword();
+  Keyword(string &keyword);
+  ~Keyword();
 };
 
-class Length : public Value
-{
+class Length : public Value {
 public:
-    float length;
+  float length;
 
-    Length(float length);
-    ~Length();
+  Length(float length);
+  ~Length();
 
-    float to_px() const override;
+  float to_px() const override;
 };
 
-class Color : public Value
-{
+class Color : public Value {
 public:
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    uint8_t alpha;
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+  uint8_t alpha;
 
-    Color(uint8_t r,
-          uint8_t g,
-          uint8_t b,
-          uint8_t alpha);
-    ~Color();
-
+  Color(uint8_t r, uint8_t g, uint8_t b, uint8_t alpha);
+  ~Color();
 };
 
-struct Declaration
-{
-    string name;
-    Value value;
+struct Declaration {
+  string name;
+  Value value;
 };
 
-class SimpleSelector
-{
+class SimpleSelector {
 
 public:
-    optional<string> tag;
-    optional<string> id_selector;
-    optional<vector<string>> class_selector;
+  optional<string> tag;
+  optional<string> id_selector;
+  optional<vector<string>> class_selector;
 
-    SimpleSelector(const optional<string> &tag, const optional<string> &id_selector, const optional<vector<string>> &class_selector);
-    ~SimpleSelector();
+  SimpleSelector(const optional<string> &tag,
+                 const optional<string> &id_selector,
+                 const optional<vector<string>> &class_selector);
+  ~SimpleSelector();
 };
 
-struct Rule
-{
-    vector<SimpleSelector> selectors;
-    vector<Declaration> declarations;
+struct Rule {
+  vector<SimpleSelector> selectors;
+  vector<Declaration> declarations;
 };
 
-struct Stylesheet
-{
-    vector<Rule> rules;
+struct Stylesheet {
+  vector<Rule> rules;
 };
 
 #endif // !CSS_HPP

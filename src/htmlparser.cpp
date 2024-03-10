@@ -1,7 +1,7 @@
 #include "dom.hpp"
 #include <iostream>
 
-int is_valid_value(const string &value) {
+static int is_valid_value(const string &value) {
   // Check if value has at least three chars
   if (value.size() < 3) {
     return 0;
@@ -17,7 +17,7 @@ int is_valid_value(const string &value) {
   return !inside_quotes.empty();
 }
 
-pair<string, string> get_key_value(string &statement) {
+static pair<string, string> get_key_value(string &statement) {
   size_t pos = statement.find('=');
 
   // '=' is found
@@ -36,7 +36,7 @@ pair<string, string> get_key_value(string &statement) {
   }
 }
 
-ElementNode *read_element(string &input, int &pos) {
+static ElementNode *read_element(const string &input, int &pos) {
   if (input[pos] != '<') {
     throw runtime_error("Element has to start with a <");
   }
@@ -104,7 +104,7 @@ ElementNode *read_element(string &input, int &pos) {
   throw runtime_error("Invalid html element");
 }
 
-int only_space_or_newline(string &str) {
+static int only_space_or_newline(string &str) {
   for (char c : str) {
     if (!isspace(c)) {
       return 0;
@@ -113,8 +113,8 @@ int only_space_or_newline(string &str) {
   return 1;
 }
 
-NodeBase *parse_aux(string &input, ElementNode *root, int &pos, string &text,
-                    vector<string> &tags) {
+static NodeBase *parse_aux(const string &input, ElementNode *root, int &pos,
+                           string &text, vector<string> &tags) {
   while (pos < input.size() && input[pos] != '<') {
     text += input[pos];
     pos++;
@@ -143,7 +143,7 @@ NodeBase *parse_aux(string &input, ElementNode *root, int &pos, string &text,
   return root;
 }
 
-NodeBase *parse(string &input) {
+NodeBase *parse(const string &input) {
   ElementNode root("");
   string text = "";
   vector<string> tags;
@@ -152,14 +152,22 @@ NodeBase *parse(string &input) {
   return temp_result->children[0];
 }
 
-/*int main(void) {
-  string value =
-      "<html\n        >\n\n\n<body>                 \n      <h1>Title</h1><div "
-      "id=\"main\"      test=\"test1\"       \n  \n\n  "
-      "\nclass=\"test\"><p id=\"para1\">Hello World!</p> "
-      "</div></body></html>";
+int main(void) {
+  string value = "<html >\n"
+                 "  <head>\n"
+                 "    <title>Test</title>\n"
+                 "  </head>\n"
+                 "  <div class=\"outer\">\n"
+                 "    <p class=\"inner\">\n"
+                 "      Hello, <span id=\"name\">world!</span>\n"
+                 "    </p>\n"
+                 "    <p class=\"inner\" id=\"bye\">\n"
+                 "      Goodbye!\n"
+                 "    </p>\n"
+                 "  </div>\n"
+                 "</html >";
   NodeBase *res = parse(value);
   NodeBase::print(res);
   NodeBase::free_node(res);
   return 0;
-}*/
+}

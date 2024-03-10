@@ -116,7 +116,10 @@ static int only_space_or_newline(string &str) {
 static NodeBase *parse_aux(const string &input, ElementNode *root, int &pos,
                            string &text, vector<string> &tags) {
   while (pos < input.size() && input[pos] != '<') {
-    text += input[pos];
+    if (input[pos] != '\n') {
+      text += input[pos];
+    }
+    
     pos++;
   }
 
@@ -162,7 +165,7 @@ int main(void) {
                  "      Hello, <span id=\"name\">world!</span>\n"
                  "    </p>\n"
                  "    <p class=\"inner\" id=\"bye\">\n"
-                 "      Goodbye!\n"
+                 "      Goodbye!             \n"
                  "    </p>\n"
                  "  </div>\n"
                  "</html >";

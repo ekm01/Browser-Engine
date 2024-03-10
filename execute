@@ -2,6 +2,6 @@
 
 set -xe
 
-g++ src/*.cpp -o dom
+g++ src/*.cpp -o program
 
-./dom
+./program

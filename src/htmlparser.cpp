@@ -119,7 +119,7 @@ static NodeBase *parse_aux(const string &input, ElementNode *root, int &pos,
     if (input[pos] != '\n') {
       text += input[pos];
     }
-    
+
     pos++;
   }
 
@@ -155,7 +155,7 @@ NodeBase *parse(const string &input) {
   return temp_result->children[0];
 }
 
-int main(void) {
+/*int main(void) {
   string value = "<html >\n"
                  "  <head>\n"
                  "    <title>Test</title>\n"
@@ -173,4 +173,4 @@ int main(void) {
   NodeBase::print(res);
   NodeBase::free_node(res);
   return 0;
-}
+}*/

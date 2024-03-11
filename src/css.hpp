@@ -12,6 +12,7 @@ public:
   virtual ~Value();
 
   virtual float to_px() const;
+  virtual string to_string() const;
 };
 
 class Keyword : public Value {
@@ -20,6 +21,8 @@ public:
 
   Keyword(string &keyword);
   ~Keyword();
+
+  string to_string() const override;
 };
 
 class Length : public Value {
@@ -30,6 +33,7 @@ public:
   ~Length();
 
   float to_px() const override;
+  string to_string() const override;
 };
 
 class Color : public Value {
@@ -41,6 +45,7 @@ public:
 
   Color(uint8_t r, uint8_t g, uint8_t b, uint8_t alpha);
   ~Color();
+  string to_string() const override;
 };
 
 struct Declaration {
@@ -59,6 +64,8 @@ public:
                  const optional<string> &id_selector,
                  const optional<vector<string>> &class_selector);
   ~SimpleSelector();
+
+  string to_string() const;
 };
 
 struct Rule {

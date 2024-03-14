@@ -1,4 +1,5 @@
 #include "css.hpp"
+#include <cctype>
 #include <iostream>
 #include <regex>
 #include <sstream>
@@ -162,7 +163,7 @@ static SimpleSelector analyze_element(const string &tag) {
   return selector;
 }
 
-static void analyze_selector(const string &selector, Rule &rule) {
+static void analyze_selector(const string &selector, Rule &rule, int &pos) {
   istringstream iss(selector);
   string element;
   int contains_uniselector = 0;
@@ -192,6 +193,7 @@ static void analyze_selector(const string &selector, Rule &rule) {
     throw runtime_error(
         "Universal selector should not be given with other selectors");
   }
+  pos += selector.size();
 }
 
 static int contains_single_colon(const string &declaration) {
@@ -245,8 +247,7 @@ static Value analyze_value(const string &property, string &value) {
 
 static Declaration analyze_declaration(string &declaration) {
   Declaration result;
-
-  if (declaration.find(':') != string::npos) {
+  if (!contains_single_colon(declaration)) {
     throw runtime_error("Declaration contains more than one colon");
   }
 
@@ -262,14 +263,16 @@ static Declaration analyze_declaration(string &declaration) {
   // Get value
   string value_untrimmed =
       declaration.substr(colon_pos + 1, declaration.size());
-  string value = trim_dec(value);
+  string value = trim_dec(value_untrimmed);
   result.value = analyze_value(property, value);
 
   return result;
 }
 
-static void analyze_declarations(const string &declarations, Rule &rule) {
-  istringstream iss(declarations);
+static void analyze_declarations(string &declarations, Rule &rule) {
+  string trimmed_dec = trim_dec(declarations);
+  cout << "[" + trimmed_dec + "]" << endl;
+  istringstream iss(trimmed_dec);
   string dec_str;
   while (std::getline(iss, dec_str, ';')) {
 
@@ -280,6 +283,7 @@ static void analyze_declarations(const string &declarations, Rule &rule) {
     if (start != string::npos && end != string::npos) {
       string dec = dec_str.substr(start, end - start + 1);
 
+      cout << "%" + dec + "%" << endl;
       // If a declaration does not contain a colon, error
       if (dec.find_first_of(":") == string::npos) {
         throw runtime_error("Declaration does not contain a colon");
@@ -290,20 +294,14 @@ static void analyze_declarations(const string &declarations, Rule &rule) {
       throw runtime_error("Declaration is empty");
     }
   }
-  if (rule.declarations.size() != 1) {
-    throw runtime_error(
-        "Universal selector should not be given with other selectors");
-  }
 }
 static void read_selector(Stylesheet &stylesheet, string &selector,
                           const string &input, int &pos) {
   Rule rule;
 
   // Analyze selector
-  analyze_selector(selector, rule);
-
-  // Offset pos
-  pos += selector.size();
+  analyze_selector(selector, rule, pos);
+  cout << selector << endl;
 
   // If '{' not found, invalid css
   if (input.size() == pos) {
@@ -323,11 +321,16 @@ static void read_selector(Stylesheet &stylesheet, string &selector,
     pos++;
   }
 
-  if (input.size() == pos) {
-    throw runtime_error("Invalid css expression3");
+  pos++;
+
+  // Skip newlines between selectors
+  while (pos < input.size()) {
+    if (!isspace(input[pos])) {
+      break;
+    }
+    pos++;
   }
 
-  pos++;
   stylesheet.rules.push_back(rule);
 }
 
@@ -355,17 +358,17 @@ int main() {
   Rule rule;
   string input = "h1 {\n"
                  "  text-align: center;\n"
-                 "  color: red;\n"
+                 "  color: #cc0000;\n"
                  "}\n"
                  "\n"
                  "h2 {\n"
                  "  text-align: center;\n"
-                 "  color: red;\n"
+                 "  color: #008000;\n"
                  "}\n"
                  "\n"
                  "p {\n"
                  "  text-align: center;\n"
-                 "  color: red;\n"
+                 "  color: #000080;\n"
                  "}\n"
                  "\n"
                  "h1, h2, h3 { margin: auto; color: #cc0000; }\n"

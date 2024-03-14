@@ -1,7 +1,7 @@
 #include "css.hpp"
 #include <iostream>
+#include <regex>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 
 Value::~Value() {}
@@ -57,7 +57,7 @@ string SimpleSelector::to_string() const {
 }
 
 string dec_to_string(Declaration &dec) {
-  return "{name: " + dec.name + "value: " + dec.value.to_string() + "}";
+  return "{name: " + dec.property + "value: " + dec.value.to_string() + "}";
 }
 
 string rule_to_string(Rule &rule) {
@@ -74,6 +74,17 @@ string rule_to_string(Rule &rule) {
     res += dec_to_string(dec) + ", ";
   }
   res += "]";
+  res += "}";
+  return res;
+}
+
+string stylesheet_to_string(Stylesheet &stylesheet) {
+  string res = "{";
+  res += "selectors: [";
+  for (int i = 0; i < stylesheet.rules.size(); ++i) {
+    res += "Rule " + to_string(i) + " " + rule_to_string(stylesheet.rules[i]) +
+           ", ";
+  }
   res += "}";
   return res;
 }
@@ -109,10 +120,6 @@ static void fill_simple_selector(const string &tag, char curr,
 }
 
 static SimpleSelector analyze_element(const string &tag) {
-  if (tag.empty()) {
-    throw runtime_error("Tag cannot be empty");
-  }
-
   SimpleSelector selector(std::nullopt, std::nullopt, std::nullopt);
   string name = "";
   char curr = '\0';
@@ -187,6 +194,107 @@ static void analyze_selector(const string &selector, Rule &rule) {
   }
 }
 
+static int contains_single_colon(const string &declaration) {
+  size_t pos = declaration.find(':');
+  if (pos != string::npos) {
+    size_t second_pos = declaration.find(':', pos + 1);
+    return second_pos == string::npos;
+  }
+  return 0;
+}
+
+static string trim_dec(const string &untrimmed) {
+  auto start = untrimmed.find_first_not_of(" \n");
+  auto end = untrimmed.find_last_not_of(" \n");
+
+  if (start != string::npos && end != string::npos) {
+    return untrimmed.substr(start, end - start + 1);
+  } else {
+    throw runtime_error("Either property or value is empty");
+  }
+}
+
+static Color analyze_color(const string &color) {
+  if (color.size() != 7 || color.at(0) != '#') {
+    throw runtime_error("Unexpected value for color");
+  }
+  int r = stoi(color.substr(1, 3), nullptr, 16);
+  int g = stoi(color.substr(3, 5), nullptr, 16);
+  int b = stoi(color.substr(5, color.size()), nullptr, 16);
+  int alpha = 0;
+  return Color(r, g, b, alpha);
+}
+
+static int is_valid_pixel(const string &str) {
+
+  // Regular expression pattern to match only numbers followed by "px"
+  regex pattern("^\\d+px$");
+  return regex_match(str, pattern);
+}
+
+static Value analyze_value(const string &property, string &value) {
+  if ("color" == property) {
+    return analyze_color(value);
+  } else if (is_valid_pixel(value)) {
+    float length = stof(value.substr(0, value.size() - 2));
+    return Length(length);
+  } else {
+    return Keyword(value);
+  }
+}
+
+static Declaration analyze_declaration(string &declaration) {
+  Declaration result;
+
+  if (declaration.find(':') != string::npos) {
+    throw runtime_error("Declaration contains more than one colon");
+  }
+
+  // Get property
+  size_t colon_pos = declaration.find(':');
+  string property = "";
+  if (colon_pos != string::npos) {
+    string property_untrimmed = declaration.substr(0, colon_pos);
+    property = trim_dec(property_untrimmed);
+    result.property = property;
+  }
+
+  // Get value
+  string value_untrimmed =
+      declaration.substr(colon_pos + 1, declaration.size());
+  string value = trim_dec(value);
+  result.value = analyze_value(property, value);
+
+  return result;
+}
+
+static void analyze_declarations(const string &declarations, Rule &rule) {
+  istringstream iss(declarations);
+  string dec_str;
+  while (std::getline(iss, dec_str, ';')) {
+
+    // Trim leading and trailing whitespaces
+    auto start = dec_str.find_first_not_of(" \n");
+    auto end = dec_str.find_last_not_of(" \n");
+
+    if (start != string::npos && end != string::npos) {
+      string dec = dec_str.substr(start, end - start + 1);
+
+      // If a declaration does not contain a colon, error
+      if (dec.find_first_of(":") == string::npos) {
+        throw runtime_error("Declaration does not contain a colon");
+      }
+      Declaration declaration = analyze_declaration(dec);
+      rule.declarations.push_back(declaration);
+    } else {
+      throw runtime_error("Declaration is empty");
+    }
+  }
+  if (rule.declarations.size() != 1) {
+    throw runtime_error(
+        "Universal selector should not be given with other selectors");
+  }
+}
 static void read_selector(Stylesheet &stylesheet, string &selector,
                           const string &input, int &pos) {
   Rule rule;
@@ -194,18 +302,33 @@ static void read_selector(Stylesheet &stylesheet, string &selector,
   // Analyze selector
   analyze_selector(selector, rule);
 
+  // Offset pos
+  pos += selector.size();
+
   // If '{' not found, invalid css
   if (input.size() == pos) {
     throw runtime_error("Invalid css expression2");
   }
 
+  string declarations = "";
+
   // Try to find '}' and build selector
-  while (pos < input.size() && input[pos] != '}') {
+  while (pos < input.size()) {
+    if ('}' == input[pos]) {
+      analyze_declarations(declarations, rule);
+      break;
+    } else {
+      declarations += input[pos];
+    }
+    pos++;
   }
 
   if (input.size() == pos) {
     throw runtime_error("Invalid css expression3");
   }
+
+  pos++;
+  stylesheet.rules.push_back(rule);
 }
 
 Stylesheet css_parse(const string &input) {
@@ -230,8 +353,26 @@ Stylesheet css_parse(const string &input) {
 
 int main() {
   Rule rule;
-  analyze_selector(" h1, \n\n h2.avda, \n #div.gfs.fda, .gfsgf.gfsga#h5 \n",
-                   rule);
-  cout << rule_to_string(rule) << endl;
+  string input = "h1 {\n"
+                 "  text-align: center;\n"
+                 "  color: red;\n"
+                 "}\n"
+                 "\n"
+                 "h2 {\n"
+                 "  text-align: center;\n"
+                 "  color: red;\n"
+                 "}\n"
+                 "\n"
+                 "p {\n"
+                 "  text-align: center;\n"
+                 "  color: red;\n"
+                 "}\n"
+                 "\n"
+                 "h1, h2, h3 { margin: auto; color: #cc0000; }\n"
+                 "div.note { margin-bottom: 20px; padding: 10px; }\n"
+                 "#answer { display: none; }\n"
+                 "";
+  Stylesheet css = css_parse(input);
+  cout << stylesheet_to_string(css) << endl;
   return 0;
 }

@@ -49,7 +49,7 @@ public:
 };
 
 struct Declaration {
-  string name;
+  string property;
   Value value;
 };
 

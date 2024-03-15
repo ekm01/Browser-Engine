@@ -410,7 +410,7 @@ int main() {
                  "div.note { margin-bottom: 20px; padding: 10px; }\n"
                  "#answer { display: none; }\n"
                  "";
-  string input1 = "    p#baban, #demo, .test {color: #cc0000;}";
+  string input1 = "    p#dn, #demo, .test {color: #cc0000;}";
   Stylesheet css = css_parse(input);
   cout << stylesheet_to_string(css) << endl;
   free_values(css);

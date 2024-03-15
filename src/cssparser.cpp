@@ -3,6 +3,7 @@
 #include <iostream>
 #include <regex>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 Value::~Value() {}
@@ -96,6 +97,17 @@ static void free_values(Stylesheet &stylesheet) {
   }
 }
 
+static string trim_spaces(const string &untrimmed) {
+  auto start = untrimmed.find_first_not_of(" \n");
+  auto end = untrimmed.find_last_not_of(" \n");
+
+  if (start != string::npos && end != string::npos) {
+    return untrimmed.substr(start, end - start + 1);
+  } else {
+    throw runtime_error("String is empty");
+  }
+}
+
 static void fill_simple_selector(const string &tag, char curr,
                                  SimpleSelector &selector) {
   switch (curr) {
@@ -174,13 +186,8 @@ static void analyze_selector(const string &selector, Rule &rule) {
   string element;
   int contains_uniselector = 0;
   while (std::getline(iss, element, ',')) {
-
-    // Trim leading and trailing whitespaces
-    auto start = element.find_first_not_of(" \n");
-    auto end = element.find_last_not_of(" \n");
-
-    if (start != string::npos && end != string::npos) {
-      string tag = element.substr(start, end - start + 1);
+    try {
+      string tag = trim_spaces(element);
 
       // If an element contains a whitespace, error
       if (tag.find_first_of(" \n") != std::string::npos) {
@@ -191,7 +198,7 @@ static void analyze_selector(const string &selector, Rule &rule) {
         contains_uniselector = 1;
       }
       rule.selectors.push_back(selector);
-    } else {
+    } catch (...) {
       throw runtime_error("Element is empty");
     }
   }
@@ -208,17 +215,6 @@ static int contains_single_colon(const string &declaration) {
     return second_pos == string::npos;
   }
   return 0;
-}
-
-static string trim_dec(const string &untrimmed) {
-  auto start = untrimmed.find_first_not_of(" \n");
-  auto end = untrimmed.find_last_not_of(" \n");
-
-  if (start != string::npos && end != string::npos) {
-    return untrimmed.substr(start, end - start + 1);
-  } else {
-    throw runtime_error("Either property or value is empty");
-  }
 }
 
 static Color *analyze_color(const string &color) {
@@ -261,31 +257,26 @@ static Declaration analyze_declaration(string &declaration) {
   string property = "";
   if (colon_pos != string::npos) {
     string property_untrimmed = declaration.substr(0, colon_pos);
-    property = trim_dec(property_untrimmed);
+    property = trim_spaces(property_untrimmed);
     result.property = property;
   }
 
   // Get value
   string value_untrimmed =
       declaration.substr(colon_pos + 1, declaration.size());
-  string value = trim_dec(value_untrimmed);
+  string value = trim_spaces(value_untrimmed);
   result.value = analyze_value(property, value);
 
   return result;
 }
 
 static void analyze_declarations(string &declarations, Rule &rule) {
-  string trimmed_dec = trim_dec(declarations);
+  string trimmed_dec = trim_spaces(declarations);
   istringstream iss(trimmed_dec);
   string dec_str;
   while (std::getline(iss, dec_str, ';')) {
-
-    // Trim leading and trailing whitespaces
-    auto start = dec_str.find_first_not_of(" \n");
-    auto end = dec_str.find_last_not_of(" \n");
-
-    if (start != string::npos && end != string::npos) {
-      string dec = dec_str.substr(start, end - start + 1);
+    try {
+      string dec = trim_spaces(dec_str);
 
       // If a declaration does not contain a colon, error
       if (dec.find_first_of(":") == string::npos) {
@@ -293,7 +284,8 @@ static void analyze_declarations(string &declarations, Rule &rule) {
       }
       Declaration declaration = analyze_declaration(dec);
       rule.declarations.push_back(declaration);
-    } else {
+
+    } catch (...) {
       throw runtime_error("Declaration is empty");
     }
   }

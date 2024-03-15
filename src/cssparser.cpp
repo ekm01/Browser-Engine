@@ -355,7 +355,7 @@ int main() {
                  "}\n"
                  "\n"
                  "h2 {\n"
-                 "  text-align: center;\n"
+                 "  text-align:\n center;\n"
                  "  color: #008000;\n"
                  "}\n"
                  "\n"

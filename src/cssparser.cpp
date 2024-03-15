@@ -57,7 +57,7 @@ string SimpleSelector::to_string() const {
 }
 
 static string dec_to_string(Declaration &dec) {
-  return "{ " + dec.property + " : " + dec.value->to_string() + "}";
+  return "{" + dec.property + " : " + dec.value->to_string() + "}";
 }
 
 static string rule_to_string(Rule &rule) {
@@ -97,14 +97,14 @@ static void free_values(Stylesheet &stylesheet) {
   }
 }
 
-static string trim_spaces(const string &untrimmed) {
+static string trim_spaces(const string &untrimmed, const string &message) {
   auto start = untrimmed.find_first_not_of(" \n");
   auto end = untrimmed.find_last_not_of(" \n");
 
   if (start != string::npos && end != string::npos) {
     return untrimmed.substr(start, end - start + 1);
   } else {
-    throw runtime_error("String is empty");
+    throw runtime_error(message);
   }
 }
 
@@ -186,21 +186,17 @@ static void analyze_selector(const string &selector, Rule &rule) {
   string element;
   int contains_uniselector = 0;
   while (std::getline(iss, element, ',')) {
-    try {
-      string tag = trim_spaces(element);
+    string tag = trim_spaces(element, "Element is empty");
 
-      // If an element contains a whitespace, error
-      if (tag.find_first_of(" \n") != std::string::npos) {
-        throw runtime_error("Element contains a whitespace");
-      }
-      SimpleSelector selector = analyze_element(tag);
-      if (selector.tag.has_value() && selector.tag.value() == "*") {
-        contains_uniselector = 1;
-      }
-      rule.selectors.push_back(selector);
-    } catch (...) {
-      throw runtime_error("Element is empty");
+    // If an element contains a whitespace, error
+    if (tag.find_first_of(" \n") != std::string::npos) {
+      throw runtime_error("Element contains a whitespace");
     }
+    SimpleSelector selector = analyze_element(tag);
+    if (selector.tag.has_value() && selector.tag.value() == "*") {
+      contains_uniselector = 1;
+    }
+    rule.selectors.push_back(selector);
   }
   if (contains_uniselector == 1 && rule.selectors.size() != 1) {
     throw runtime_error(
@@ -257,37 +253,38 @@ static Declaration analyze_declaration(string &declaration) {
   string property = "";
   if (colon_pos != string::npos) {
     string property_untrimmed = declaration.substr(0, colon_pos);
-    property = trim_spaces(property_untrimmed);
+    property = trim_spaces(property_untrimmed, "Property is empty");
+    if (property.find_first_of(" \n") != std::string::npos) {
+      throw runtime_error("Property contains a whitespace");
+    }
     result.property = property;
   }
 
   // Get value
   string value_untrimmed =
       declaration.substr(colon_pos + 1, declaration.size());
-  string value = trim_spaces(value_untrimmed);
+  string value = trim_spaces(value_untrimmed, "Value is empty");
+  if (value.find_first_of(" \n") != std::string::npos) {
+    throw runtime_error("Value contains a whitespace");
+  }
   result.value = analyze_value(property, value);
 
   return result;
 }
 
 static void analyze_declarations(string &declarations, Rule &rule) {
-  string trimmed_dec = trim_spaces(declarations);
+  string trimmed_dec = trim_spaces(declarations, "Declaration is empty");
   istringstream iss(trimmed_dec);
   string dec_str;
   while (std::getline(iss, dec_str, ';')) {
-    try {
-      string dec = trim_spaces(dec_str);
+    string dec = trim_spaces(dec_str, "Declaration is empty");
 
-      // If a declaration does not contain a colon, error
-      if (dec.find_first_of(":") == string::npos) {
-        throw runtime_error("Declaration does not contain a colon");
-      }
-      Declaration declaration = analyze_declaration(dec);
-      rule.declarations.push_back(declaration);
-
-    } catch (...) {
-      throw runtime_error("Declaration is empty");
+    // If a declaration does not contain a colon, error
+    if (dec.find_first_of(":") == string::npos) {
+      throw runtime_error("Declaration does not contain a colon");
     }
+    Declaration declaration = analyze_declaration(dec);
+    rule.declarations.push_back(declaration);
   }
 }
 static void read_selector(Stylesheet &stylesheet, string &selector,
@@ -301,6 +298,9 @@ static void read_selector(Stylesheet &stylesheet, string &selector,
   if (input.size() == pos) {
     throw runtime_error("Invalid css expression2");
   }
+
+  // Skip '{'
+  pos++;
 
   string declarations = "";
 
@@ -349,7 +349,7 @@ Stylesheet css_parse(const string &input) {
 
 int main() {
   Rule rule;
-  string input = "h 1 {\n"
+  string input = "h1 {\n"
                  "  text-align: center;\n"
                  "  color: #cc0000;\n"
                  "}\n"
@@ -364,7 +364,7 @@ int main() {
                  "  color: #000080;\n"
                  "}\n"
                  "\n"
-                 "h1, h2, h3 { margin: auto; color: #cc0000; }\n"
+                 "h1, h2 , h3 { margin: auto; color: #cc0000; }\n"
                  "div.note { margin-bottom: 20px; padding: 10px; }\n"
                  "#answer { display: none; }\n"
                  "";

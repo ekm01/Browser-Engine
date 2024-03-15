@@ -12,13 +12,11 @@ float Value::to_px() const { return 0.0; }
 
 Keyword::Keyword(string &keyword) : keyword(keyword) {}
 Keyword::~Keyword(){};
-string Keyword::to_string() const { return "keyword: " + keyword; }
+string Keyword::to_string() const { return keyword; }
 
 Length::Length(float length) : length(length) {}
 Length::~Length() {}
-string Length::to_string() const {
-  return "length: " + std::to_string(length) + "px";
-}
+string Length::to_string() const { return std::to_string(length) + "px"; }
 
 float Length::to_px() const { return length; }
 
@@ -26,7 +24,7 @@ Color::Color(uint8_t r, uint8_t g, uint8_t b, uint8_t alpha)
     : r(r), g(g), b(b), alpha(alpha) {}
 Color::~Color() {}
 string Color::to_string() const {
-  return "color: [" + std::to_string(r) + ", " + std::to_string(g) + ", " +
+  return "[" + std::to_string(r) + ", " + std::to_string(g) + ", " +
          std::to_string(b) + ", " + std::to_string(alpha) + "]";
 }
 
@@ -58,7 +56,7 @@ string SimpleSelector::to_string() const {
 }
 
 string dec_to_string(Declaration &dec) {
-  return "{name: " + dec.property + "value: " + dec.value.to_string() + "}";
+  return "{ " + dec.property + " : " + dec.value->to_string() + "}";
 }
 
 string rule_to_string(Rule &rule) {
@@ -163,7 +161,7 @@ static SimpleSelector analyze_element(const string &tag) {
   return selector;
 }
 
-static void analyze_selector(const string &selector, Rule &rule, int &pos) {
+static void analyze_selector(const string &selector, Rule &rule) {
   istringstream iss(selector);
   string element;
   int contains_uniselector = 0;
@@ -193,7 +191,6 @@ static void analyze_selector(const string &selector, Rule &rule, int &pos) {
     throw runtime_error(
         "Universal selector should not be given with other selectors");
   }
-  pos += selector.size();
 }
 
 static int contains_single_colon(const string &declaration) {
@@ -216,7 +213,7 @@ static string trim_dec(const string &untrimmed) {
   }
 }
 
-static Color analyze_color(const string &color) {
+static Color *analyze_color(const string &color) {
   if (color.size() != 7 || color.at(0) != '#') {
     throw runtime_error("Unexpected value for color");
   }
@@ -224,7 +221,7 @@ static Color analyze_color(const string &color) {
   int g = stoi(color.substr(3, 5), nullptr, 16);
   int b = stoi(color.substr(5, color.size()), nullptr, 16);
   int alpha = 0;
-  return Color(r, g, b, alpha);
+  return new Color(r, g, b, alpha);
 }
 
 static int is_valid_pixel(const string &str) {
@@ -234,14 +231,14 @@ static int is_valid_pixel(const string &str) {
   return regex_match(str, pattern);
 }
 
-static Value analyze_value(const string &property, string &value) {
+static Value *analyze_value(const string &property, string &value) {
   if ("color" == property) {
     return analyze_color(value);
   } else if (is_valid_pixel(value)) {
     float length = stof(value.substr(0, value.size() - 2));
-    return Length(length);
+    return new Length(length);
   } else {
-    return Keyword(value);
+    return new Keyword(value);
   }
 }
 
@@ -271,7 +268,6 @@ static Declaration analyze_declaration(string &declaration) {
 
 static void analyze_declarations(string &declarations, Rule &rule) {
   string trimmed_dec = trim_dec(declarations);
-  cout << "[" + trimmed_dec + "]" << endl;
   istringstream iss(trimmed_dec);
   string dec_str;
   while (std::getline(iss, dec_str, ';')) {
@@ -283,7 +279,6 @@ static void analyze_declarations(string &declarations, Rule &rule) {
     if (start != string::npos && end != string::npos) {
       string dec = dec_str.substr(start, end - start + 1);
 
-      cout << "%" + dec + "%" << endl;
       // If a declaration does not contain a colon, error
       if (dec.find_first_of(":") == string::npos) {
         throw runtime_error("Declaration does not contain a colon");
@@ -300,8 +295,7 @@ static void read_selector(Stylesheet &stylesheet, string &selector,
   Rule rule;
 
   // Analyze selector
-  analyze_selector(selector, rule, pos);
-  cout << selector << endl;
+  analyze_selector(selector, rule);
 
   // If '{' not found, invalid css
   if (input.size() == pos) {
@@ -330,7 +324,6 @@ static void read_selector(Stylesheet &stylesheet, string &selector,
     }
     pos++;
   }
-
   stylesheet.rules.push_back(rule);
 }
 

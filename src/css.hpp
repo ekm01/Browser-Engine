@@ -50,7 +50,7 @@ public:
 
 struct Declaration {
   string property;
-  Value value;
+  Value *value;
 };
 
 class SimpleSelector {

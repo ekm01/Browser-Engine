@@ -104,6 +104,93 @@ static string trim_spaces(const string &untrimmed, const string &message) {
   }
 }
 
+//-----------------------DECLARATION-----------------------
+
+static int contains_single_colon(const string &declaration) {
+  size_t pos = declaration.find(':');
+  if (pos != string::npos) {
+    size_t second_pos = declaration.find(':', pos + 1);
+    return second_pos == string::npos;
+  }
+  return 0;
+}
+
+static int is_valid_pixel(const string &str) {
+  // Regular expression pattern to match only numbers followed by "px"
+  regex pattern("^\\d+px$");
+  return regex_match(str, pattern);
+}
+
+static Color *analyze_color(const string &color) {
+  if (color.size() != 7 || color.at(0) != '#') {
+    throw runtime_error("Unexpected value for color");
+  }
+  int r = stoi(color.substr(1, 3), nullptr, 16);
+  int g = stoi(color.substr(3, 5), nullptr, 16);
+  int b = stoi(color.substr(5, color.size()), nullptr, 16);
+  int alpha = 0;
+  return new Color(r, g, b, alpha);
+}
+
+static Value *analyze_value(const string &property, string &value) {
+  if ("color" == property) {
+    return analyze_color(value);
+  } else if (is_valid_pixel(value)) {
+    float length = stof(value.substr(0, value.size() - 2));
+    return new Length(length);
+  } else {
+    return new Keyword(value);
+  }
+}
+
+static Declaration analyze_declaration(string &declaration) {
+  Declaration result;
+  if (!contains_single_colon(declaration)) {
+    throw runtime_error("Declaration contains more than one colon");
+  }
+
+  // Get property
+  size_t colon_pos = declaration.find(':');
+  string property = "";
+  if (colon_pos != string::npos) {
+    string property_untrimmed = declaration.substr(0, colon_pos);
+    property = trim_spaces(property_untrimmed, "Property is empty");
+    if (property.find_first_of(" \n") != std::string::npos) {
+      throw runtime_error("Property contains a whitespace");
+    }
+    result.property = property;
+  }
+
+  // Get value
+  string value_untrimmed =
+      declaration.substr(colon_pos + 1, declaration.size());
+  string value = trim_spaces(value_untrimmed, "Value is empty");
+  if (value.find_first_of(" \n") != std::string::npos) {
+    throw runtime_error("Value contains a whitespace");
+  }
+  result.value = analyze_value(property, value);
+
+  return result;
+}
+
+static void analyze_declarations(string &declarations, Rule &rule) {
+  string trimmed_dec = trim_spaces(declarations, "Declaration is empty");
+  istringstream iss(trimmed_dec);
+  string dec_str;
+  while (std::getline(iss, dec_str, ';')) {
+    string dec = trim_spaces(dec_str, "Declaration is empty");
+
+    // If a declaration does not contain a colon, error
+    if (dec.find_first_of(":") == string::npos) {
+      throw runtime_error("Declaration does not contain a colon");
+    }
+    Declaration declaration = analyze_declaration(dec);
+    rule.declarations.push_back(declaration);
+  }
+}
+
+//-----------------------SELECTOR-----------------------
+
 static void fill_simple_selector(const string &tag, char curr,
                                  SimpleSelector &selector) {
   switch (curr) {
@@ -200,89 +287,6 @@ static void analyze_selector(const string &selector, Rule &rule) {
   }
 }
 
-static int contains_single_colon(const string &declaration) {
-  size_t pos = declaration.find(':');
-  if (pos != string::npos) {
-    size_t second_pos = declaration.find(':', pos + 1);
-    return second_pos == string::npos;
-  }
-  return 0;
-}
-
-static Color *analyze_color(const string &color) {
-  if (color.size() != 7 || color.at(0) != '#') {
-    throw runtime_error("Unexpected value for color");
-  }
-  int r = stoi(color.substr(1, 3), nullptr, 16);
-  int g = stoi(color.substr(3, 5), nullptr, 16);
-  int b = stoi(color.substr(5, color.size()), nullptr, 16);
-  int alpha = 0;
-  return new Color(r, g, b, alpha);
-}
-
-static int is_valid_pixel(const string &str) {
-
-  // Regular expression pattern to match only numbers followed by "px"
-  regex pattern("^\\d+px$");
-  return regex_match(str, pattern);
-}
-
-static Value *analyze_value(const string &property, string &value) {
-  if ("color" == property) {
-    return analyze_color(value);
-  } else if (is_valid_pixel(value)) {
-    float length = stof(value.substr(0, value.size() - 2));
-    return new Length(length);
-  } else {
-    return new Keyword(value);
-  }
-}
-
-static Declaration analyze_declaration(string &declaration) {
-  Declaration result;
-  if (!contains_single_colon(declaration)) {
-    throw runtime_error("Declaration contains more than one colon");
-  }
-
-  // Get property
-  size_t colon_pos = declaration.find(':');
-  string property = "";
-  if (colon_pos != string::npos) {
-    string property_untrimmed = declaration.substr(0, colon_pos);
-    property = trim_spaces(property_untrimmed, "Property is empty");
-    if (property.find_first_of(" \n") != std::string::npos) {
-      throw runtime_error("Property contains a whitespace");
-    }
-    result.property = property;
-  }
-
-  // Get value
-  string value_untrimmed =
-      declaration.substr(colon_pos + 1, declaration.size());
-  string value = trim_spaces(value_untrimmed, "Value is empty");
-  if (value.find_first_of(" \n") != std::string::npos) {
-    throw runtime_error("Value contains a whitespace");
-  }
-  result.value = analyze_value(property, value);
-
-  return result;
-}
-
-static void analyze_declarations(string &declarations, Rule &rule) {
-  string trimmed_dec = trim_spaces(declarations, "Declaration is empty");
-  istringstream iss(trimmed_dec);
-  string dec_str;
-  while (std::getline(iss, dec_str, ';')) {
-    string dec = trim_spaces(dec_str, "Declaration is empty");
-
-    // If a declaration does not contain a colon, error
-    if (dec.find_first_of(":") == string::npos) {
-      throw runtime_error("Declaration does not contain a colon");
-    }
-    Declaration declaration = analyze_declaration(dec);
-    rule.declarations.push_back(declaration);
-  }
-}
 static void read_selector(Stylesheet &stylesheet, string &selector,
                           const string &input, int &pos) {
   Rule rule;

@@ -55,11 +55,11 @@ string SimpleSelector::to_string() const {
   return res;
 }
 
-string dec_to_string(Declaration &dec) {
+static string dec_to_string(Declaration &dec) {
   return "{ " + dec.property + " : " + dec.value->to_string() + "}";
 }
 
-string rule_to_string(Rule &rule) {
+static string rule_to_string(Rule &rule) {
   string res = "{";
   res += "selectors: [";
 
@@ -77,7 +77,7 @@ string rule_to_string(Rule &rule) {
   return res;
 }
 
-string stylesheet_to_string(Stylesheet &stylesheet) {
+static string stylesheet_to_string(Stylesheet &stylesheet) {
   string res = "{";
   res += "selectors: [";
   for (int i = 0; i < stylesheet.rules.size(); ++i) {
@@ -86,6 +86,14 @@ string stylesheet_to_string(Stylesheet &stylesheet) {
   }
   res += "}";
   return res;
+}
+
+static void free_values(Stylesheet &stylesheet) {
+  for (Rule rule : stylesheet.rules) {
+    for (Declaration dec : rule.declarations) {
+      delete dec.value;
+    }
+  }
 }
 
 static void fill_simple_selector(const string &tag, char curr,
@@ -370,5 +378,6 @@ int main() {
                  "";
   Stylesheet css = css_parse(input);
   cout << stylesheet_to_string(css) << endl;
+  free_values(css);
   return 0;
 }

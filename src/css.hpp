@@ -66,6 +66,8 @@ public:
   ~SimpleSelector();
 
   string to_string() const;
+
+  unsigned int specificity() const;
 };
 
 struct Rule {

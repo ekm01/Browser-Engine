@@ -52,6 +52,35 @@ string SimpleSelector::to_string() const {
   return res;
 }
 
+unsigned int SimpleSelector::specificity() const {
+  int specificity = 0;
+
+  // Element has specificity value 1
+  if (tag.has_value()) {
+    specificity += 1;
+  }
+
+  // Id selector has specificity value 100
+  if (id_selector.has_value()) {
+    specificity += 100;
+  }
+
+  // Class selector has specificity value 10
+  if (class_selector.has_value()) {
+    specificity += class_selector.value().size() * 10;
+  }
+
+  return specificity;
+}
+
+static int rule_specificity(Rule &rule) {
+  int specificity = 0;
+  for (SimpleSelector selector : rule.selectors) {
+    specificity += selector.specificity();
+  }
+  return specificity;
+}
+
 static string dec_to_string(Declaration &dec) {
   return "{" + dec.property + " : " + dec.value->to_string() + "}";
 }
@@ -315,6 +344,7 @@ static void read_selector(Stylesheet &stylesheet, string &selector,
     pos++;
   }
 
+  // Skip '}'
   pos++;
 
   // Skip newlines between selectors
@@ -324,6 +354,13 @@ static void read_selector(Stylesheet &stylesheet, string &selector,
     }
     pos++;
   }
+
+  // Sort selectors regarding specificity in descending order
+  sort(rule.selectors.begin(), rule.selectors.end(),
+       [](SimpleSelector &a, SimpleSelector &b) {
+         return b.specificity() < a.specificity();
+       });
+
   stylesheet.rules.push_back(rule);
 }
 
@@ -343,6 +380,11 @@ Stylesheet css_parse(const string &input) {
     selector += input[pos];
     pos++;
   }
+
+  // Sort rules regarding specificity in descending order
+  sort(stylesheet.rules.begin(), stylesheet.rules.end(), [](Rule &a, Rule &b) {
+    return rule_specificity(b) < rule_specificity(a);
+  });
 
   return stylesheet;
 }
@@ -368,6 +410,7 @@ int main() {
                  "div.note { margin-bottom: 20px; padding: 10px; }\n"
                  "#answer { display: none; }\n"
                  "";
+  string input1 = "    p#baban, #demo, .test {color: #cc0000;}";
   Stylesheet css = css_parse(input);
   cout << stylesheet_to_string(css) << endl;
   free_values(css);

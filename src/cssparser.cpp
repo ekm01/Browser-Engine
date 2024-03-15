@@ -349,7 +349,7 @@ Stylesheet css_parse(const string &input) {
 
 int main() {
   Rule rule;
-  string input = "h1 {\n"
+  string input = "h 1 {\n"
                  "  text-align: center;\n"
                  "  color: #cc0000;\n"
                  "}\n"

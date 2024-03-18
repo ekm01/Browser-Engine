@@ -51,4 +51,6 @@ public:
   string to_string() const override;
 };
 
+NodeBase *html_parse(const string &input);
+
 #endif // !DOM_HPP

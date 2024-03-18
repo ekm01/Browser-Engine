@@ -400,11 +400,11 @@ Stylesheet css_parse(const string &input) {
   return stylesheet;
 }
 
-int main() {
+/*int main() {
   Rule rule;
-  string input = "examples/css/test1.css";
-  Stylesheet css = css_parse(input);
+  string filename = "examples/css/test1.css";
+  Stylesheet css = css_parse(filename);
   cout << stylesheet_to_string(css) << endl;
   free_values(css);
   return 0;
-}
+}*/

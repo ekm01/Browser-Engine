@@ -165,7 +165,7 @@ static NodeBase *parse_aux(ifstream &input, ElementNode *root, string &text,
   return root;
 }
 
-NodeBase *parse(const string &input) {
+NodeBase *html_parse(const string &input) {
   ifstream file;
   file.open(input);
   if (!file.is_open()) {
@@ -182,8 +182,8 @@ NodeBase *parse(const string &input) {
 }
 
 /*int main(void) {
-  string value = "examples/html/test1.html";
-  NodeBase *res = parse(value);
+  string filename = "examples/html/test1.html";
+  NodeBase *res = html_parse(filename);
   NodeBase::print(res);
   NodeBase::free_node(res);
   return 0;

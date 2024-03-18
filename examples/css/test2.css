@@ -1,0 +1,21 @@
+div#header {
+    background-color: #f0f0f0;
+    color: #333000;
+    padding: 20px;
+    text-align: center;
+}
+
+.article.highlight {
+    border: 2px solid #ff9900;
+    background-color: #ffffe0;
+    margin: 10px 0;
+    padding: 15px;
+}
+
+p#intro.active {
+    font-size: 18px;
+    color: #0066cc;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+

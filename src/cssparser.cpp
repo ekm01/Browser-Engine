@@ -150,19 +150,25 @@ static int is_valid_pixel(const string &str) {
   return regex_match(str, pattern);
 }
 
-static Color *analyze_color(const string &color) {
-  if (color.size() != 7 || color.at(0) != '#') {
+static Color *analyze_color(string &color) {
+  if (color.size() < 2 || color.size() > 7) {
     throw runtime_error("Unexpected value for color");
   }
-  int r = stoi(color.substr(1, 3), nullptr, 16);
-  int g = stoi(color.substr(3, 5), nullptr, 16);
-  int b = stoi(color.substr(5, color.size()), nullptr, 16);
+
+  // If color length < 7, fill the rest with zeros
+  while (color.size() != 7) {
+    color += "0";
+  }
+
+  int r = stoi(color.substr(1, 2), nullptr, 16);
+  int g = stoi(color.substr(3, 2), nullptr, 16);
+  int b = stoi(color.substr(5, 2), nullptr, 16);
   int alpha = 0;
   return new Color(r, g, b, alpha);
 }
 
-static Value *analyze_value(const string &property, string &value) {
-  if ("color" == property) {
+static Value *analyze_value(string &value) {
+  if (value.at(0) == '#') {
     return analyze_color(value);
   } else if (is_valid_pixel(value)) {
     float length = stof(value.substr(0, value.size() - 2));
@@ -194,10 +200,7 @@ static Declaration analyze_declaration(string &declaration) {
   string value_untrimmed =
       declaration.substr(colon_pos + 1, declaration.size());
   string value = trim_spaces(value_untrimmed, "Value is empty");
-  if (value.find_first_of(" \n") != std::string::npos) {
-    throw runtime_error("Value contains a whitespace");
-  }
-  result.value = analyze_value(property, value);
+  result.value = analyze_value(value);
 
   return result;
 }
@@ -389,30 +392,31 @@ Stylesheet css_parse(const string &input) {
   return stylesheet;
 }
 
-/*int main() {
+int main() {
   Rule rule;
-  string input = "h1 {\n"
-                 "  text-align: center;\n"
-                 "  color: #cc0000;\n"
+  string input = "div#header {\n"
+                 "    background-color: #f0f0f0;\n"
+                 "    color: #333;\n"
+                 "    padding: 20px;\n"
+                 "    text-align: center;\n"
                  "}\n"
                  "\n"
-                 "h2 {\n"
-                 "  text-align:\n center;\n"
-                 "  color: #008000;\n"
+                 ".article.highlight {\n"
+                 "    border: 2px;\n"
+                 "    background-color: #ffffe0;\n"
+                 "    margin: 10px 0;\n"
+                 "    padding: 15px;\n"
                  "}\n"
                  "\n"
-                 "p {\n"
-                 "  text-align: center;\n"
-                 "  color: #000080;\n"
-                 "}\n"
-                 "\n"
-                 "h1, h2 , h3 { margin: auto; color: #cc0000; }\n"
-                 "div.note { margin-bottom: 20px; padding: 10px; }\n"
-                 "#answer { display: none; }\n"
-                 "";
+                 "p#intro.active {\n"
+                 "    font-size: 18px;\n"
+                 "    color: #0066cc;\n"
+                 "    font-weight: bold;\n"
+                 "    margin-bottom: 20px;\n"
+                 "}";
   string input1 = "    p#dn, #demo, .test {color: #cc0000;}";
   Stylesheet css = css_parse(input);
   cout << stylesheet_to_string(css) << endl;
   free_values(css);
   return 0;
-}*/
+}

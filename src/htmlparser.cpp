@@ -2,6 +2,34 @@
 #include <fstream>
 #include <iostream>
 
+static int only_space_or_newline(string &text) {
+  for (char c : text) {
+    if (!isspace(c)) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+static string collapse_spaces(string &text) {
+  string result = "";
+  int previous = 0;
+
+  for (char c : text) {
+    if (c == ' ') {
+      if (!previous) {
+        result += c;
+        previous = 1;
+      }
+    } else {
+      result += c;
+      previous = 0;
+    }
+  }
+
+  return result;
+}
+
 static int is_valid_value(const string &value) {
   // Check if value has at least three chars
   if (value.size() < 3) {
@@ -105,34 +133,6 @@ static ElementNode *read_element(ifstream &input, char c) {
   throw runtime_error("Invalid html element");
 }
 
-static int only_space_or_newline(string &text) {
-  for (char c : text) {
-    if (!isspace(c)) {
-      return 0;
-    }
-  }
-  return 1;
-}
-
-static string collapse_spaces(string &text) {
-  string result = "";
-  int previous = 0;
-
-  for (char c : text) {
-    if (c == ' ') {
-      if (!previous) {
-        result += c;
-        previous = 1;
-      }
-    } else {
-      result += c;
-      previous = 0;
-    }
-  }
-
-  return result;
-}
-
 static NodeBase *parse_aux(ifstream &input, ElementNode *root, string &text,
                            vector<string> &tags) {
   char c;
@@ -180,10 +180,10 @@ NodeBase *parse(const string &input) {
   return temp_result->children[0];
 }
 
-int main(void) {
-  string value = "examples/test1.html";
+/*int main(void) {
+  string value = "examples/html/test1.html";
   NodeBase *res = parse(value);
   NodeBase::print(res);
   NodeBase::free_node(res);
   return 0;
-}
+}*/

@@ -1,14 +1,14 @@
 div#header {
     background-color: #f0f0f0;
-    color: #333000;
+    color: #333;
     padding: 20px;
     text-align: center;
 }
 
 .article.highlight {
-    border: 2px solid #ff9900;
+    border: 2px;
     background-color: #ffffe0;
-    margin: 10px 0;
+    margin: 10 px;
     padding: 15px;
 }
 

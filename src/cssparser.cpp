@@ -1,4 +1,5 @@
 #include "css.hpp"
+#include <fstream>
 #include <iostream>
 #include <regex>
 
@@ -320,42 +321,42 @@ static void analyze_selector(const string &selector, Rule &rule) {
 }
 
 static void read_selector(Stylesheet &stylesheet, string &selector,
-                          const string &input, int &pos) {
+                          ifstream &input, char &c) {
+
   Rule rule;
 
   // Analyze selector
   analyze_selector(selector, rule);
 
-  // If '{' not found, invalid css
-  if (input.size() == pos) {
-    throw runtime_error("Invalid css expression2");
-  }
-
   // Skip '{'
-  pos++;
+  c = input.get();
 
   string declarations = "";
 
   // Try to find '}' and build selector
-  while (pos < input.size()) {
-    if ('}' == input[pos]) {
+  while (input) {
+    if ('}' == c) {
       analyze_declarations(declarations, rule);
       break;
     } else {
-      declarations += input[pos];
+      declarations += c;
     }
-    pos++;
+    c = input.get();
+  }
+
+  if (c != '}' && input.eof()) {
+    throw runtime_error("A '}' is missing");
   }
 
   // Skip '}'
-  pos++;
+  c = input.get();
 
   // Skip newlines between selectors
-  while (pos < input.size()) {
-    if (!isspace(input[pos])) {
+  while (input) {
+    if (!isspace(c)) {
       break;
     }
-    pos++;
+    c = input.get();
   }
 
   // Sort selectors regarding specificity in descending order
@@ -368,20 +369,26 @@ static void read_selector(Stylesheet &stylesheet, string &selector,
 }
 
 Stylesheet css_parse(const string &input) {
+  ifstream file;
+  file.open(input);
+  if (!file.is_open()) {
+    throw runtime_error("Error opening the file");
+  }
+
   Stylesheet stylesheet;
   string selector = "";
-  int pos = 0;
-  while (pos < input.size()) {
-    if (input[pos] == '}') {
+  char c;
+  while (file) {
+    c = file.get();
+    if ('}' == c) {
       throw runtime_error("Invalid css selector");
-    } else if (input[pos] == '{') {
+    } else if ('{' == c) {
       if (!selector.empty()) {
-        read_selector(stylesheet, selector, input, pos);
+        read_selector(stylesheet, selector, file, c);
         selector = "";
       }
     }
-    selector += input[pos];
-    pos++;
+    selector += c;
   }
 
   // Sort rules regarding specificity in descending order
@@ -389,32 +396,13 @@ Stylesheet css_parse(const string &input) {
     return rule_specificity(b) < rule_specificity(a);
   });
 
+  file.close();
   return stylesheet;
 }
 
 int main() {
   Rule rule;
-  string input = "div#header {\n"
-                 "    background-color: #f0f0f0;\n"
-                 "    color: #333;\n"
-                 "    padding: 20px;\n"
-                 "    text-align: center;\n"
-                 "}\n"
-                 "\n"
-                 ".article.highlight {\n"
-                 "    border: 2px;\n"
-                 "    background-color: #ffffe0;\n"
-                 "    margin: 10px 0;\n"
-                 "    padding: 15px;\n"
-                 "}\n"
-                 "\n"
-                 "p#intro.active {\n"
-                 "    font-size: 18px;\n"
-                 "    color: #0066cc;\n"
-                 "    font-weight: bold;\n"
-                 "    margin-bottom: 20px;\n"
-                 "}";
-  string input1 = "    p#dn, #demo, .test {color: #cc0000;}";
+  string input = "examples/css/test1.css";
   Stylesheet css = css_parse(input);
   cout << stylesheet_to_string(css) << endl;
   free_values(css);

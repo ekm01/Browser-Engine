@@ -176,6 +176,7 @@ NodeBase *parse(const string &input) {
   string text = "";
   vector<string> tags;
   NodeBase *temp_result = parse_aux(file, &root, text, tags);
+
   file.close();
   return temp_result->children[0];
 }

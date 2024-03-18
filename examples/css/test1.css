@@ -19,6 +19,6 @@ a {
   text-decoration: none;
 }
 
-a.hover {
+a.hover, h1 {
   text-decoration: underline;
 }

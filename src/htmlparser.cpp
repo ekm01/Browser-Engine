@@ -1,5 +1,6 @@
 #include "dom.hpp"
 #include <iostream>
+#include <fstream>
 
 static int is_valid_value(const string &value) {
   // Check if value has at least three chars
@@ -36,40 +37,41 @@ static pair<string, string> get_key_value(string &statement) {
   }
 }
 
-static ElementNode *read_element(const string &input, int &pos) {
-  if (input[pos] != '<') {
+static ElementNode *read_element(ifstream &input, char c) {
+  if (c != '<') {
     throw runtime_error("Element has to start with a <");
   }
 
-  pos++;
+  // Skip '<'
+  c = input.get();
 
-  if (isspace(input[pos])) {
+  if (isspace(c)) {
     throw runtime_error("No space allowed after <");
   }
 
   string tag = "";
 
   // Try to find the tag
-  while (pos < input.size()) {
-    if ('>' == input[pos]) {
+
+  while (input) {
+    if ('>' == c) {
       // Only found a single tag without any attributes
       if (tag.find('/') == 0) {
         tag = tag.substr(1);
       }
-      pos++;
-      return new (malloc(sizeof(ElementNode))) ElementNode(tag);
+      return new ElementNode(tag);
     }
 
-    if (isspace(input[pos])) {
+    if (isspace(c)) {
       // Found tag so break to get attributes
-      pos++;
+      c = input.get();
       break;
     }
-    tag += input[pos];
-    pos++;
+    tag += c;
+    c = input.get();
   }
 
-  if (input.size() == pos) {
+  if (input.eof()) {
     throw runtime_error("Invalid html element");
   }
 
@@ -80,18 +82,17 @@ static ElementNode *read_element(const string &input, int &pos) {
   // Try to find attributes
   AttributeMap map;
   string attr = "";
-  while (pos < input.size()) {
-    if ('>' == input[pos]) {
+  while (input) {
+    if ('>' == c) {
       if (!attr.empty()) {
         pair<string, string> key_value = get_key_value(attr);
         map.insert(key_value);
       }
-      pos++;
-      return new (malloc(sizeof(ElementNode))) ElementNode(tag, map);
+      return new ElementNode(tag, map);
     }
 
-    if (!isspace(input[pos])) {
-      attr += input[pos];
+    if (!isspace(c)) {
+      attr += c;
     } else {
       if (!attr.empty()) {
         pair<string, string> key_value = get_key_value(attr);
@@ -99,13 +100,13 @@ static ElementNode *read_element(const string &input, int &pos) {
         attr = "";
       }
     }
-    pos++;
+    c = input.get();
   }
   throw runtime_error("Invalid html element");
 }
 
-static int only_space_or_newline(string &str) {
-  for (char c : str) {
+static int only_space_or_newline(string &text) {
+  for (char c : text) {
     if (!isspace(c)) {
       return 0;
     }
@@ -113,22 +114,41 @@ static int only_space_or_newline(string &str) {
   return 1;
 }
 
-static NodeBase *parse_aux(const string &input, ElementNode *root, int &pos,
-                           string &text, vector<string> &tags) {
-  while (pos < input.size() && input[pos] != '<') {
-    if (input[pos] != '\n') {
-      text += input[pos];
+
+static string collapse_spaces(string& text) {
+    string result = "";
+    int previous = 0;
+
+    for (char c : text) {
+        if (c == ' ') {
+            if (!previous) {
+                result += c;
+                previous = 1;
+            }
+        } else {
+            result += c;
+            previous = 0;
+        }
     }
 
-    pos++;
+    return result;
+}
+
+static NodeBase *parse_aux(ifstream &input, ElementNode *root, 
+                           string &text, vector<string> &tags) {
+  char c;
+  while (input && (c = input.get()) != '<') {
+    if (c != '\n') {
+      text += c;
+    }
   }
 
   if (!text.empty() && !only_space_or_newline(text)) {
-    root->add_child(new (malloc(sizeof(TextNode))) TextNode(text));
+    root->add_child(new TextNode(text));
   }
   text = "";
 
-  ElementNode *node = read_element(input, pos);
+  ElementNode *node = read_element(input, c);
 
   if (node->tag == root->tag) {
     NodeBase::free_node(node);
@@ -137,40 +157,35 @@ static NodeBase *parse_aux(const string &input, ElementNode *root, int &pos,
   }
   tags.push_back(node->tag);
 
-  ElementNode *child = (ElementNode *)parse_aux(input, node, pos, text, tags);
+  ElementNode *child = (ElementNode *)parse_aux(input, node, text, tags);
   root->add_child(child);
 
   if (tags.size() != 0) {
-    return parse_aux(input, root, pos, text, tags);
+    return parse_aux(input, root, text, tags);
   }
   return root;
 }
 
 NodeBase *parse(const string &input) {
+  ifstream file;
+  file.open(input);
+  if (!file.is_open())
+  {
+    throw runtime_error("Error opening the file");
+  }
+  
   ElementNode root("");
   string text = "";
   vector<string> tags;
-  int pos = 0;
-  NodeBase *temp_result = parse_aux(input, &root, pos, text, tags);
+  NodeBase *temp_result = parse_aux(file, &root, text, tags);
+  file.close();
   return temp_result->children[0];
 }
 
-/*int main(void) {
-  string value = "<html >\n"
-                 "  <head>\n"
-                 "    <title>Test</title>\n"
-                 "  </head>\n"
-                 "  <div class=\"outer\">\n"
-                 "    <p class=\"inner\">\n"
-                 "      Hello, <span id=\"name\">world!</span>\n"
-                 "    </p>\n"
-                 "    <p class=\"inner\" id=\"bye\">\n"
-                 "      Goodbye!             \n"
-                 "    </p>\n"
-                 "  </div>\n"
-                 "</html >";
+int main(void) {
+  string value = "examples/test.html";
   NodeBase *res = parse(value);
   NodeBase::print(res);
   NodeBase::free_node(res);
   return 0;
-}*/
+}

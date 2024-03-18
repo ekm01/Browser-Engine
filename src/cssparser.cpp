@@ -389,7 +389,7 @@ Stylesheet css_parse(const string &input) {
   return stylesheet;
 }
 
-int main() {
+/*int main() {
   Rule rule;
   string input = "h1 {\n"
                  "  text-align: center;\n"
@@ -415,4 +415,4 @@ int main() {
   cout << stylesheet_to_string(css) << endl;
   free_values(css);
   return 0;
-}
+}*/

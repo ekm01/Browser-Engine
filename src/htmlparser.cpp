@@ -1,6 +1,6 @@
 #include "dom.hpp"
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 static int is_valid_value(const string &value) {
   // Check if value has at least three chars
@@ -114,28 +114,27 @@ static int only_space_or_newline(string &text) {
   return 1;
 }
 
+static string collapse_spaces(string &text) {
+  string result = "";
+  int previous = 0;
 
-static string collapse_spaces(string& text) {
-    string result = "";
-    int previous = 0;
-
-    for (char c : text) {
-        if (c == ' ') {
-            if (!previous) {
-                result += c;
-                previous = 1;
-            }
-        } else {
-            result += c;
-            previous = 0;
-        }
+  for (char c : text) {
+    if (c == ' ') {
+      if (!previous) {
+        result += c;
+        previous = 1;
+      }
+    } else {
+      result += c;
+      previous = 0;
     }
+  }
 
-    return result;
+  return result;
 }
 
-static NodeBase *parse_aux(ifstream &input, ElementNode *root, 
-                           string &text, vector<string> &tags) {
+static NodeBase *parse_aux(ifstream &input, ElementNode *root, string &text,
+                           vector<string> &tags) {
   char c;
   while (input && (c = input.get()) != '<') {
     if (c != '\n') {
@@ -169,11 +168,10 @@ static NodeBase *parse_aux(ifstream &input, ElementNode *root,
 NodeBase *parse(const string &input) {
   ifstream file;
   file.open(input);
-  if (!file.is_open())
-  {
+  if (!file.is_open()) {
     throw runtime_error("Error opening the file");
   }
-  
+
   ElementNode root("");
   string text = "";
   vector<string> tags;
@@ -183,7 +181,7 @@ NodeBase *parse(const string &input) {
 }
 
 int main(void) {
-  string value = "examples/test.html";
+  string value = "examples/test1.html";
   NodeBase *res = parse(value);
   NodeBase::print(res);
   NodeBase::free_node(res);

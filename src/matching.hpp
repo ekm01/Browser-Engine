@@ -13,6 +13,9 @@ public:
   PropertyMap values;
   vector<MatchedNode *> children;
 
+  MatchedNode(NodeBase *dom_node, const PropertyMap &values);
+  ~MatchedNode();
+
   static void print(MatchedNode *node);
   static void free_node(MatchedNode *node);
 };

@@ -16,6 +16,7 @@ public:
   MatchedNode(NodeBase *dom_node, const PropertyMap &values);
   ~MatchedNode();
 
+  string to_string() const;
   static void print(MatchedNode *node);
   static void free_node(MatchedNode *node);
 };

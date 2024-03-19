@@ -11,7 +11,6 @@ string NodeBase::to_string() const { return ""; }
 // BFS to print the DOM tree
 void NodeBase::print(NodeBase *node) {
   if (NULL == node) {
-    cerr << "Given node is empty" << endl;
     return;
   }
 

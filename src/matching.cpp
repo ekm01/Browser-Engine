@@ -4,7 +4,16 @@
 MatchedNode::MatchedNode(NodeBase *dom_node, const PropertyMap &values)
     : dom_node(dom_node), values(values) {}
 
-string MatchedNode::to_string() const { throw runtime_error("TODO"); }
+string MatchedNode::to_string() const {
+  string result = "{dom: " + dom_node->to_string() + ", property map: [";
+
+  for (pair<string, Value> p : values) {
+    result += "(" + p.first + ";" + p.second.to_string() + ")" + ",";
+  }
+
+  result += "]}";
+  return result;
+}
 
 void MatchedNode::print(MatchedNode *node) {
   if (NULL == node) {

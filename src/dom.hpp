@@ -23,7 +23,6 @@ public:
   virtual string to_string() const;
 
   static void print(NodeBase *node);
-
   static void free_node(NodeBase *node);
 };
 

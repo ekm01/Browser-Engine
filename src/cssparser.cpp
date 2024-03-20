@@ -1,4 +1,4 @@
-#include "css.hpp"
+#include "cssparser.hpp"
 #include <fstream>
 #include <iostream>
 #include <regex>
@@ -104,9 +104,8 @@ static string rule_to_string(Rule &rule) {
   return res;
 }
 
-static string stylesheet_to_string(Stylesheet &stylesheet) {
-  string res = "{";
-  res += "selectors: [";
+string stylesheet_to_string(Stylesheet &stylesheet) {
+  string res = "{[";
   for (int i = 0; i < stylesheet.rules.size(); ++i) {
     res += "Rule " + to_string(i) + " " + rule_to_string(stylesheet.rules[i]) +
            ", ";
@@ -115,7 +114,7 @@ static string stylesheet_to_string(Stylesheet &stylesheet) {
   return res;
 }
 
-static void free_values(Stylesheet &stylesheet) {
+void free_values(Stylesheet &stylesheet) {
   for (Rule rule : stylesheet.rules) {
     for (Declaration dec : rule.declarations) {
       delete dec.value;

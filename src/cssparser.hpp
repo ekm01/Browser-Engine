@@ -79,6 +79,8 @@ struct Stylesheet {
   vector<Rule> rules;
 };
 
+string stylesheet_to_string(Stylesheet &stylesheet);
+void free_values(Stylesheet &stylesheet);
 Stylesheet css_parse(const string &input);
 
 #endif // !CSS_HPP

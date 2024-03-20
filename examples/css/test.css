@@ -1,20 +1,34 @@
 h1 {
-  text-align: center;
-  color: #cc0000;
-}
+    text-align: center;
+    color: #cc0000;
+  }
 
-h2 {
-  text-align:
- center;
-  color: #008000;
-}
+  h2 {
+    text-align: center;
+    color: #00cc00;
+  }
 
-p {
-  text-align: center;
-  color: #000080;
-}
+  p {
+    text-align: center;
+    color: #000080;
+  }
 
-h1, h2 , h3 { margin: auto; color: #cc0000; }
-div.note { margin-bottom: 20px; padding: 10px; }
-#answer { display: none; }
+  h2 , h3 {
+    margin: auto;
+    color: #cc0000;
+  }
+
+  div.note {
+    margin-bottom: 20px;
+    padding: 10px;
+  }
+
+  #answer {
+    display: none;
+  }
+  
+  h2 , h3 {
+    margin: auto;
+    color: #008000;
+  }
 

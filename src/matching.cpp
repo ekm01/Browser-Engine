@@ -1,8 +1,10 @@
 #include "matching.hpp"
+#include "cssparser.hpp"
 #include <iostream>
 
 MatchedNode::MatchedNode(NodeBase *dom_node, const PropertyMap &values)
     : dom_node(dom_node), values(values) {}
+MatchedNode::~MatchedNode() {}
 
 string MatchedNode::to_string() const {
   string result = "{dom: " + dom_node->to_string() + ", property map: [";
@@ -59,6 +61,13 @@ void MatchedNode::free_node(MatchedNode *node) {
 }
 
 int main() {
-  throw runtime_error("TODO");
+  NodeBase *dom = html_parse("examples/html/test.html");
+  Stylesheet css = css_parse("examples/css/test.css");
+  NodeBase::print(dom);
+  cout << endl << endl << endl;
+  cout << endl << stylesheet_to_string(css) << endl;
+
+  NodeBase::free_node(dom);
+  free_values(css);
   return 0;
 }

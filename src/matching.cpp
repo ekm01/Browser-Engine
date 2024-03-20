@@ -7,9 +7,9 @@ MatchedNode::MatchedNode(NodeBase *dom_node, const PropertyMap &values)
 MatchedNode::~MatchedNode() {}
 
 string MatchedNode::to_string() const {
-  string result = "{dom: " + dom_node->to_string() + ", property map: [";
+  string result = "{dom: " + this->dom_node->to_string() + ", property map: [";
 
-  for (pair<string, Value> p : values) {
+  for (pair<string, Value> p : this->values) {
     result += "(" + p.first + ";" + p.second.to_string() + ")" + ",";
   }
 

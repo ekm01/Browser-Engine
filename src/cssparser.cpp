@@ -10,20 +10,20 @@ float Value::to_px() const { return 0.0; }
 
 Keyword::Keyword(string &keyword) : keyword(keyword) {}
 Keyword::~Keyword(){};
-string Keyword::to_string() const { return keyword; }
+string Keyword::to_string() const { return this->keyword; }
 
 Length::Length(float length) : length(length) {}
 Length::~Length() {}
-string Length::to_string() const { return std::to_string(length) + "px"; }
+string Length::to_string() const { return std::to_string(this->length) + "px"; }
 
-float Length::to_px() const { return length; }
+float Length::to_px() const { return this->length; }
 
 Color::Color(uint8_t r, uint8_t g, uint8_t b, uint8_t alpha)
     : r(r), g(g), b(b), alpha(alpha) {}
 Color::~Color() {}
 string Color::to_string() const {
-  return "[" + std::to_string(r) + ", " + std::to_string(g) + ", " +
-         std::to_string(b) + ", " + std::to_string(alpha) + "]";
+  return "[" + std::to_string(this->r) + ", " + std::to_string(this->g) + ", " +
+         std::to_string(this->b) + ", " + std::to_string(this->alpha) + "]";
 }
 
 SimpleSelector::SimpleSelector(const optional<string> &tag,
@@ -34,17 +34,17 @@ SimpleSelector::~SimpleSelector() {}
 
 string SimpleSelector::to_string() const {
   string res = "{";
-  if (tag.has_value()) {
-    res += "tag: " + tag.value() + "; ";
+  if (this->tag.has_value()) {
+    res += "tag: " + this->tag.value() + "; ";
   }
 
-  if (id_selector.has_value()) {
-    res += "id_selector: " + id_selector.value() + "; ";
+  if (this->id_selector.has_value()) {
+    res += "id_selector: " + this->id_selector.value() + "; ";
   }
 
-  if (class_selector.has_value()) {
+  if (this->class_selector.has_value()) {
     res += "class_selector: [";
-    for (string cs : class_selector.value()) {
+    for (string cs : this->class_selector.value()) {
       res += cs + ", ";
     }
     res += "]; ";
@@ -57,18 +57,18 @@ unsigned int SimpleSelector::specificity() const {
   int specificity = 0;
 
   // Element has specificity value 1
-  if (tag.has_value()) {
+  if (this->tag.has_value()) {
     specificity += 1;
   }
 
   // Id selector has specificity value 100
-  if (id_selector.has_value()) {
+  if (this->id_selector.has_value()) {
     specificity += 100;
   }
 
   // Class selector has specificity value 10
-  if (class_selector.has_value()) {
-    specificity += class_selector.value().size() * 10;
+  if (this->class_selector.has_value()) {
+    specificity += this->class_selector.value().size() * 10;
   }
 
   return specificity;

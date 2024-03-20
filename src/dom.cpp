@@ -4,7 +4,7 @@
 NodeBase::NodeBase(TypeEnum type_enum) : type_enum(type_enum) {}
 NodeBase::~NodeBase() {}
 
-void NodeBase::add_child(NodeBase *child) { children.push_back(child); }
+void NodeBase::add_child(NodeBase *child) { this->children.push_back(child); }
 
 string NodeBase::to_string() const { return ""; }
 
@@ -55,7 +55,9 @@ void NodeBase::free_node(NodeBase *node) {
 TextNode::TextNode(const string &text) : NodeBase(TEXT), type_data(text) {}
 TextNode::~TextNode() {}
 
-string TextNode::to_string() const { return "{TEXT, data: " + type_data + "}"; }
+string TextNode::to_string() const {
+  return "{TEXT, data: " + this->type_data + "}";
+}
 
 ElementNode::ElementNode(const string &tag) : NodeBase(ELEMENT), tag(tag) {}
 ElementNode::ElementNode(const string &tag, const AttributeMap &attributes)
@@ -64,8 +66,9 @@ ElementNode::~ElementNode() {}
 
 string ElementNode::to_string() const {
   string attrs = "";
-  for (pair<string, string> p : attributes) {
+  for (pair<string, string> p : this->attributes) {
     attrs += "(" + p.first + ";" + p.second + ")" + ",";
   }
-  return "{ELEMENT, tag: " + tag + ", " + "attributes: [" + attrs + "]" + "}";
+  return "{ELEMENT, tag: " + this->tag + ", " + "attributes: [" + attrs + "]" +
+         "}";
 }

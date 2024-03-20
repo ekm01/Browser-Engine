@@ -1,4 +1,5 @@
 #include "dom.hpp"
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 
@@ -115,9 +116,14 @@ static ElementNode *read_element(ifstream &input, char c) {
   int quotect = 0;
   while (input) {
     if ('>' == c) {
+      if (1 == quotect) {
+        throw runtime_error("Invalid html element");
+      }
       return new ElementNode(tag, map);
     } else if ('"' == c) {
       quotect++;
+    } else if ('<' == c) {
+      throw runtime_error("Invalid html element");
     }
 
     attr += c;
@@ -139,6 +145,9 @@ static NodeBase *parse_aux(ifstream &input, ElementNode *root, string &text,
   while (input && (c = input.get()) != '<') {
     if (c != '\n') {
       text += c;
+    }
+    if ('>' == c) {
+      throw runtime_error("\'<\' is not allowed inside text");
     }
   }
 

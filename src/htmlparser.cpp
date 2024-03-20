@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 
+extern string trim_spaces(const string &untrimmed, const string &message);
+
 static int only_space_or_newline(string &text) {
   for (char c : text) {
     if (!isspace(c)) {
@@ -50,9 +52,12 @@ static pair<string, string> get_key_value(string &statement) {
   size_t pos = statement.find('=');
 
   // '=' is found
-  if (pos != std::string::npos) {
-    string key = statement.substr(0, pos);
-    string value = statement.substr(pos + 1);
+  if (pos != string::npos) {
+    string key =
+        trim_spaces(statement.substr(0, pos), "Unexpected attribute key");
+
+    string value =
+        trim_spaces(statement.substr(pos + 1), "Unexpected attribute value");
 
     // Check if value is ok
     if (!is_valid_value(value)) {
@@ -66,9 +71,6 @@ static pair<string, string> get_key_value(string &statement) {
 }
 
 static ElementNode *read_element(ifstream &input, char c) {
-  if (c != '<') {
-    throw runtime_error("Element has to start with a <");
-  }
 
   // Skip '<'
   c = input.get();
@@ -106,27 +108,26 @@ static ElementNode *read_element(ifstream &input, char c) {
   if (tag.find('/') == 0) {
     tag = tag.substr(1);
   }
+  cout << tag << endl;
 
   // Try to find attributes
   AttributeMap map;
   string attr = "";
+  int quotect = 0;
   while (input) {
     if ('>' == c) {
-      if (!attr.empty()) {
-        pair<string, string> key_value = get_key_value(attr);
-        map.insert(key_value);
-      }
       return new ElementNode(tag, map);
+    } else if ('"' == c) {
+      quotect++;
     }
 
-    if (!isspace(c)) {
-      attr += c;
-    } else {
-      if (!attr.empty()) {
-        pair<string, string> key_value = get_key_value(attr);
-        map.insert(key_value);
-        attr = "";
-      }
+    attr += c;
+
+    if (2 == quotect) {
+      pair<string, string> key_value = get_key_value(attr);
+      map.insert(key_value);
+      attr = "";
+      quotect = 0;
     }
     c = input.get();
   }

@@ -122,7 +122,7 @@ void free_values(Stylesheet &stylesheet) {
   }
 }
 
-static string trim_spaces(const string &untrimmed, const string &message) {
+string trim_spaces(const string &untrimmed, const string &message) {
   auto start = untrimmed.find_first_not_of(" \n");
   auto end = untrimmed.find_last_not_of(" \n");
 

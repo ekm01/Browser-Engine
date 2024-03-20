@@ -7,7 +7,8 @@ MatchedNode::MatchedNode(NodeBase *dom_node, const PropertyMap &values)
 MatchedNode::~MatchedNode() {}
 
 string MatchedNode::to_string() const {
-  string result = "{dom: " + this->dom_node->to_string() + ", property map: [";
+  string result =
+      "{dom_node: " + this->dom_node->to_string() + ", property map: [";
 
   for (pair<string, Value> p : this->values) {
     result += "(" + p.first + ";" + p.second.to_string() + ")" + ",";
@@ -64,8 +65,8 @@ int main() {
   NodeBase *dom = html_parse("examples/html/test.html");
   Stylesheet css = css_parse("examples/css/test.css");
   NodeBase::print(dom);
-  cout << endl << endl << endl;
-  cout << endl << stylesheet_to_string(css) << endl;
+  cout << "\n\n" << endl;
+  cout << stylesheet_to_string(css) << endl;
 
   NodeBase::free_node(dom);
   free_values(css);

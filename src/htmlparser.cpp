@@ -108,7 +108,6 @@ static ElementNode *read_element(ifstream &input, char c) {
   if (tag.find('/') == 0) {
     tag = tag.substr(1);
   }
-  cout << tag << endl;
 
   // Try to find attributes
   AttributeMap map;

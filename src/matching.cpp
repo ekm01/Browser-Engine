@@ -1,6 +1,8 @@
 #include "matching.hpp"
 #include "cssparser.hpp"
+#include "dom.hpp"
 #include <iostream>
+#include <utility>
 
 MatchedNode::MatchedNode(NodeBase *dom_node, const PropertyMap &values)
     : dom_node(dom_node), values(values) {}
@@ -70,5 +72,6 @@ int main() {
 
   NodeBase::free_node(dom);
   free_values(css);
+
   return 0;
 }

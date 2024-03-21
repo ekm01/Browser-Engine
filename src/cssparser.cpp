@@ -254,7 +254,7 @@ static void fill_simple_selector(const string &tag, char curr,
 }
 
 static SimpleSelector analyze_element(const string &tag) {
-  SimpleSelector selector(std::nullopt, std::nullopt, std::nullopt);
+  SimpleSelector selector({}, {}, {});
   string name = "";
   char curr = '\0';
   int pos = 0;
@@ -275,7 +275,7 @@ static SimpleSelector analyze_element(const string &tag) {
       if (0 != pos || tag.size() - 1 != pos) {
         throw runtime_error("Universal selector must be single");
       }
-      return SimpleSelector("*", std::nullopt, std::nullopt);
+      return SimpleSelector("*", {}, {});
 
       // Id and class selectors
     } else if ('.' == tag[pos] || '#' == tag[pos]) {

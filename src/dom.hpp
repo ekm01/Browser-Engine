@@ -1,8 +1,10 @@
 #ifndef DOM_HPP
 #define DOM_HPP
 
+#include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
@@ -37,6 +39,7 @@ public:
 };
 
 typedef unordered_map<string, string> AttributeMap;
+typedef unordered_set<string> ClassSet;
 
 class ElementNode : public NodeBase {
 public:
@@ -48,6 +51,8 @@ public:
   ~ElementNode();
 
   string to_string() const override;
+  optional<ClassSet> get_classes() const;
+  optional<string> get_id() const;
 };
 
 NodeBase *html_parse(const string &input);

@@ -1,5 +1,6 @@
 #include "dom.hpp"
 #include <iostream>
+#include <sstream>
 
 NodeBase::NodeBase(TypeEnum type_enum) : type_enum(type_enum) {}
 NodeBase::~NodeBase() {}
@@ -71,4 +72,27 @@ string ElementNode::to_string() const {
   }
   return "{ELEMENT, tag: " + this->tag + ", " + "attributes: [" + attrs + "]" +
          "}";
+}
+
+optional<ClassSet> ElementNode::get_classes() const {
+  auto it = this->attributes.find("class");
+  if (this->attributes.end() == it) {
+    return {};
+  }
+
+  ClassSet class_set;
+  istringstream iss(it->second);
+  string class_name;
+  int contains_uniselector = 0;
+  while (std::getline(iss, class_name, ' ')) {
+    class_set.insert(class_name);
+  }
+  return class_set;
+}
+optional<string> ElementNode::get_id() const {
+  auto it = this->attributes.find("id");
+  if (this->attributes.end() == it) {
+    return {};
+  }
+  return it->second;
 }

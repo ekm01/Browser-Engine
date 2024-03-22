@@ -76,6 +76,8 @@ string ElementNode::to_string() const {
 
 optional<ClassSet> ElementNode::get_classes() const {
   auto it = this->attributes.find("class");
+
+  // If there is no class, return None
   if (this->attributes.end() == it) {
     return {};
   }

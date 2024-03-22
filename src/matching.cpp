@@ -63,6 +63,40 @@ void MatchedNode::free_node(MatchedNode *node) {
   delete node;
 }
 
+static int match_element_selector(ElementNode &element,
+                                  SimpleSelector &selector) {
+
+  if (selector.tag.value_or("") != element.tag) {
+    return 0;
+  }
+
+  optional<string> element_id = element.get_id();
+  if (element_id.value_or("0") != selector.id_selector.value_or("")) {
+    return 0;
+  }
+
+  optional<ClassSet> element_classes = element.get_classes();
+  if (selector.class_selector.has_value() && element_classes.has_value()) {
+    vector<string> classes = selector.class_selector.value();
+    ClassSet class_set = element_classes.value();
+
+    int matches = 0;
+    for (string c : classes) {
+      auto it = class_set.find(c);
+      if (it != class_set.end()) {
+        matches = 1;
+        break;
+      }
+    }
+    return matches;
+  } else if (selector.class_selector.has_value() ^
+             element_classes.has_value()) {
+    return 0;
+  }
+
+  return 1;
+}
+
 MatchedNode *match_aux(NodeBase *dom, Stylesheet &css, MatchedNode *res,
                        PropertyMap &map) {
   if (nullptr == dom) {
@@ -79,7 +113,6 @@ MatchedNode *match_aux(NodeBase *dom, Stylesheet &css, MatchedNode *res,
     }
   }
   // TODO: Implement the logic
-  return res;
 }
 
 int main() {

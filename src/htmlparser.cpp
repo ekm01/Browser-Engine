@@ -153,6 +153,11 @@ static NodeBase *parse_aux(ifstream &input, ElementNode *root, string &text,
   }
 
   if (!text.empty() && !only_space_or_newline(text)) {
+    if (input.eof()) {
+      text.pop_back();
+      root->add_child(new TextNode(text));
+      return root;
+    }
     root->add_child(new TextNode(text));
   }
   text = "";

@@ -13,7 +13,7 @@ public:
   PropertyMap values;
   vector<MatchedNode *> children;
 
-  MatchedNode(NodeBase *dom_node, const PropertyMap &values);
+  MatchedNode(NodeBase *dom_node, PropertyMap &values);
   ~MatchedNode();
 
   string to_string() const;

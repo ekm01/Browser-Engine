@@ -4,7 +4,7 @@
 #include <iostream>
 #include <utility>
 
-MatchedNode::MatchedNode(NodeBase *dom_node, const PropertyMap &values)
+MatchedNode::MatchedNode(NodeBase *dom_node, PropertyMap &values)
     : dom_node(dom_node), values(values) {}
 MatchedNode::~MatchedNode() {}
 
@@ -63,6 +63,25 @@ void MatchedNode::free_node(MatchedNode *node) {
   delete node;
 }
 
+MatchedNode *match_aux(NodeBase *dom, Stylesheet &css, MatchedNode *res,
+                       PropertyMap &map) {
+  if (nullptr == dom) {
+    return res;
+  }
+
+  for (int i = 0; i < dom->children.size(); ++i) {
+    if (ELEMENT == dom->type_enum) {
+
+      MatchedNode *node = match_aux(
+          dom->children[i], css, new MatchedNode(dom->children[i], map), map);
+      res->children.push_back(node);
+      map.clear();
+    }
+  }
+  // TODO: Implement the logic
+  return res;
+}
+
 int main() {
   NodeBase *dom = html_parse("examples/html/test.html");
   Stylesheet css = css_parse("examples/css/test.css");
@@ -72,6 +91,5 @@ int main() {
 
   NodeBase::free_node(dom);
   free_values(css);
-
   return 0;
 }

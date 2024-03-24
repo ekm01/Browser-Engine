@@ -26,27 +26,27 @@ void MatchedNode::print(MatchedNode *node) {
   }
 
   int level = -1;
-  tuple<MatchedNode *, int> head(node, 0);
-  vector<tuple<MatchedNode *, int>> frontier = {head};
+  pair<MatchedNode *, int> head(node, 0);
+  vector<pair<MatchedNode *, int>> frontier = {head};
 
   while (!frontier.empty()) {
-    tuple<MatchedNode *, int> removed = frontier.front();
-    MatchedNode *removed_nb = get<0>(removed);
+    pair<MatchedNode *, int> removed = frontier.front();
+    MatchedNode *removed_nb = removed.first;
 
     frontier.erase(frontier.begin());
 
     string res = removed_nb->to_string();
 
-    if (level < get<1>(removed)) {
+    if (level < removed.second) {
       res = "\n" + res;
-      level = get<1>(removed);
+      level = removed.second;
     }
     cout << res << "  ";
 
     if (!(removed_nb->children.empty())) {
       for (MatchedNode *nb : removed_nb->children) {
-        tuple<MatchedNode *, int> tuple(nb, level + 1);
-        frontier.push_back(tuple);
+        pair<MatchedNode *, int> pair(nb, level + 1);
+        frontier.push_back(pair);
       }
     }
   }

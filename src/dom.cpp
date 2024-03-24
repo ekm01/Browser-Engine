@@ -16,12 +16,12 @@ void NodeBase::print(NodeBase *node) {
   }
 
   int level = -1;
-  tuple<NodeBase *, int> head(node, 0);
-  vector<tuple<NodeBase *, int>> frontier = {head};
+  pair<NodeBase *, int> head(node, 0);
+  vector<pair<NodeBase *, int>> frontier = {head};
 
   while (!frontier.empty()) {
-    tuple<NodeBase *, int> removed = frontier.front();
-    NodeBase *removed_nb = get<0>(removed);
+    pair<NodeBase *, int> removed = frontier.front();
+    NodeBase *removed_nb = removed.first;
 
     frontier.erase(frontier.begin());
 
@@ -35,8 +35,8 @@ void NodeBase::print(NodeBase *node) {
 
     if (!(removed_nb->children.empty())) {
       for (NodeBase *nb : removed_nb->children) {
-        tuple<NodeBase *, int> tuple(nb, level + 1);
-        frontier.push_back(tuple);
+        pair<NodeBase *, int> pair(nb, level + 1);
+        frontier.push_back(pair);
       }
     }
   }

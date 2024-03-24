@@ -69,9 +69,8 @@ static int match_element_selector(ElementNode &element,
     return 0;
   }
 
-  optional<string> element_id = element.get_id();
-  if (selector.id_selector.has_value() ^ element_id.has_value() ||
-      selector.id_selector.value_or("") != element_id.value_or("")) {
+  string element_id = element.get_id().value_or("");
+  if (selector.id_selector.value_or(element_id) != element_id) {
     return 0;
   }
 
@@ -86,7 +85,6 @@ static int match_element_selector(ElementNode &element,
         return 0;
       }
     }
-    cout << "fsmgnfs,ngfnsmgm" << endl;
   } else if (selector.class_selector.has_value() &&
              !element_classes.has_value()) {
     return 0;
@@ -127,7 +125,7 @@ int main() {
   map.insert(make_pair("class", " test1  test2 test3 test4 "));
 
   ElementNode teste("test", map);
-  SimpleSelector tests("test", "test",
+  SimpleSelector tests({}, {},
                        vector<string>{"test1", "test2", "test3", "test4"});
   cout << match_element_selector(teste, tests) << endl;
   return 0;

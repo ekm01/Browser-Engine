@@ -27,9 +27,9 @@ void NodeBase::print(NodeBase *node) {
 
     string res = removed_nb->to_string();
 
-    if (level < get<1>(removed)) {
+    if (level < removed.second) {
       res = "\n" + res;
-      level = get<1>(removed);
+      level = removed.second;
     }
     cout << res << "  ";
 

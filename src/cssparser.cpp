@@ -16,8 +16,6 @@ Length::Length(float length) : length(length) {}
 Length::~Length() {}
 string Length::to_string() const { return std::to_string(this->length) + "px"; }
 
-float Length::to_px() const { return this->length; }
-
 Color::Color(uint8_t r, uint8_t g, uint8_t b, uint8_t alpha)
     : r(r), g(g), b(b), alpha(alpha) {}
 Color::~Color() {}

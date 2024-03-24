@@ -32,7 +32,6 @@ public:
   Length(float length);
   ~Length();
 
-  float to_px() const override;
   string to_string() const override;
 };
 

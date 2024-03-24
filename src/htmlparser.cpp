@@ -1,5 +1,4 @@
 #include "dom.hpp"
-#include <algorithm>
 #include <fstream>
 #include <iostream>
 
@@ -155,10 +154,10 @@ static NodeBase *parse_aux(ifstream &input, ElementNode *root, string &text,
   if (!text.empty() && !only_space_or_newline(text)) {
     if (input.eof()) {
       text.pop_back();
-      root->add_child(new TextNode(text));
+      root->children.push_back(new TextNode(text));
       return root;
     }
-    root->add_child(new TextNode(text));
+    root->children.push_back(new TextNode(text));
   }
   text = "";
 
@@ -172,7 +171,7 @@ static NodeBase *parse_aux(ifstream &input, ElementNode *root, string &text,
   tags.push_back(node->tag);
 
   ElementNode *child = (ElementNode *)parse_aux(input, node, text, tags);
-  root->add_child(child);
+  root->children.push_back(child);
 
   if (tags.size() != 0) {
     return parse_aux(input, root, text, tags);

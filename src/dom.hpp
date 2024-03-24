@@ -20,8 +20,6 @@ public:
   NodeBase(TypeEnum type_enum);
   virtual ~NodeBase();
 
-  void add_child(NodeBase *child);
-
   virtual string to_string() const;
 
   static void print(NodeBase *node);

@@ -1,5 +1,4 @@
 #include "matching.hpp"
-#include "cssparser.hpp"
 #include "dom.hpp"
 #include <iostream>
 #include <utility>
@@ -66,12 +65,13 @@ void MatchedNode::free_node(MatchedNode *node) {
 static int match_element_selector(ElementNode &element,
                                   SimpleSelector &selector) {
 
-  if (selector.tag.value_or("") != element.tag) {
+  if (selector.tag.value_or(element.tag) != element.tag) {
     return 0;
   }
 
   optional<string> element_id = element.get_id();
-  if (element_id.value_or("0") != selector.id_selector.value_or("")) {
+  if (selector.id_selector.has_value() ^ element_id.has_value() ||
+      selector.id_selector.value_or("") != element_id.value_or("")) {
     return 0;
   }
 
@@ -80,25 +80,23 @@ static int match_element_selector(ElementNode &element,
     vector<string> classes = selector.class_selector.value();
     ClassSet class_set = element_classes.value();
 
-    int matches = 0;
     for (string c : classes) {
       auto it = class_set.find(c);
-      if (it != class_set.end()) {
-        matches = 1;
-        break;
+      if (it == class_set.end()) {
+        return 0;
       }
     }
-    return matches;
-  } else if (selector.class_selector.has_value() ^
-             element_classes.has_value()) {
+    cout << "fsmgnfs,ngfnsmgm" << endl;
+  } else if (selector.class_selector.has_value() &&
+             !element_classes.has_value()) {
     return 0;
   }
 
   return 1;
 }
 
-MatchedNode *match_aux(NodeBase *dom, Stylesheet &css, MatchedNode *res,
-                       PropertyMap &map) {
+static MatchedNode *match_aux(NodeBase *dom, Stylesheet &css, MatchedNode *res,
+                              PropertyMap &map) {
   if (nullptr == dom) {
     return res;
   }
@@ -116,13 +114,21 @@ MatchedNode *match_aux(NodeBase *dom, Stylesheet &css, MatchedNode *res,
 }
 
 int main() {
-  NodeBase *dom = html_parse("examples/html/test.html");
+  /*NodeBase *dom = html_parse("examples/html/test.html");
   Stylesheet css = css_parse("examples/css/test.css");
   NodeBase::print(dom);
   cout << "\n\n" << endl;
   cout << stylesheet_to_string(css) << endl;
 
   NodeBase::free_node(dom);
-  free_values(css);
+  free_values(css);*/
+  AttributeMap map;
+  map.insert(make_pair("id", "test"));
+  map.insert(make_pair("class", " test1  test2 test3 test4 "));
+
+  ElementNode teste("test", map);
+  SimpleSelector tests("test", "test",
+                       vector<string>{"test1", "test2", "test3", "test4"});
+  cout << match_element_selector(teste, tests) << endl;
   return 0;
 }

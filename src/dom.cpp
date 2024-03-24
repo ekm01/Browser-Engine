@@ -5,8 +5,6 @@
 NodeBase::NodeBase(TypeEnum type_enum) : type_enum(type_enum) {}
 NodeBase::~NodeBase() {}
 
-void NodeBase::add_child(NodeBase *child) { this->children.push_back(child); }
-
 string NodeBase::to_string() const { return ""; }
 
 // BFS to print the DOM tree

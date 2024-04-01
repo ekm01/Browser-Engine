@@ -1,4 +1,5 @@
 #include "matching.hpp"
+#include "cssparser.hpp"
 #include <iostream>
 #include <string>
 
@@ -114,7 +115,7 @@ static PropertyMap create_map(NodeBase *element, Stylesheet &css) {
     Rule rule = matched_rules.back();
     matched_rules.pop_back();
     for (Declaration dec : rule.declarations) {
-      map.insert(make_pair(dec.property, dec.value));
+      map[dec.property] = dec.value;
     }
     ++i;
   }

@@ -1,5 +1,5 @@
 h1 {
-    text-align: right;
+    text-align: center;
     color: #cc0000;
   }
 
@@ -9,7 +9,7 @@ h1 {
   }
 
   p, h1 {
-    text-align: left;
+    text-align: center;
     color: #000080;
   }
 

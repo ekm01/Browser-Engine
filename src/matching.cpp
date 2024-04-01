@@ -1,9 +1,6 @@
 #include "matching.hpp"
-#include "cssparser.hpp"
-#include "dom.hpp"
 #include <iostream>
-#include <stdexcept>
-#include <utility>
+#include <string>
 
 MatchedNode::MatchedNode(NodeBase *dom_node, PropertyMap &values)
     : dom_node(dom_node), values(values) {}
@@ -14,8 +11,8 @@ string MatchedNode::to_string() const {
   string result =
       "{dom_node: " + this->dom_node->to_string() + ", property map: [";
 
-  for (pair<string, Value> p : this->values) {
-    result += "(" + p.first + ";" + p.second.to_string() + ")" + ",";
+  for (pair<string, Value *> p : this->values) {
+    result += "(" + p.first + ";" + (*p.second).to_string() + ")" + ",";
   }
 
   result += "]}";
@@ -117,35 +114,36 @@ static PropertyMap create_map(NodeBase *element, Stylesheet &css) {
     Rule rule = matched_rules.back();
     matched_rules.pop_back();
     for (Declaration dec : rule.declarations) {
-      map.insert(make_pair(dec.property, *dec.value));
+      map.insert(make_pair(dec.property, dec.value));
     }
     ++i;
   }
   return map;
 }
 
-static MatchedNode *match_aux(NodeBase *dom, Stylesheet &css,
-                              MatchedNode *res) {
+static void match_aux(NodeBase *dom, Stylesheet &css, MatchedNode *res) {
   if (nullptr == dom) {
-    return res;
+    return;
   }
 
   for (int i = 0; i < dom->children.size(); ++i) {
     if (ELEMENT == dom->children[i]->type_enum) {
-      MatchedNode *node = match_aux(dom->children[i], css, res);
+      MatchedNode *node = new MatchedNode();
+      match_aux(dom->children[i], css, node);
       res->children.push_back(node);
     }
   }
   if (ELEMENT == dom->type_enum) {
     PropertyMap map = create_map(dom, css);
-    return new MatchedNode(dom, map);
+    res->dom_node = dom;
+    res->values = map;
   }
-  return res;
 }
 
 MatchedNode *match(NodeBase *dom, Stylesheet &css) {
-  MatchedNode root;
-  MatchedNode *temp_result = match_aux(dom, css, &root);
+  MatchedNode *root = new MatchedNode();
+  match_aux(dom, css, root);
+  return root;
 }
 
 int main() {
@@ -154,13 +152,11 @@ int main() {
   NodeBase::print(dom);
   cout << "\n\n" << endl;
   cout << stylesheet_to_string(css) << endl;
-  vector<Rule> rules = match_rule(dom->children[0]->children[0], css);
-  cout << "RULES:" << endl;
-  for (Rule rule : rules) {
-    cout << rule_to_string(rule) << endl;
-  }
 
-  NodeBase::free_node(dom);
+  MatchedNode *res = match(dom, css);
+  MatchedNode::print(res);
   free_values(css);
+  NodeBase::free_node(dom);
+  MatchedNode::free_node(res);
   return 0;
 }

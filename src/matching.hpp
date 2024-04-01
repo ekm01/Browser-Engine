@@ -14,6 +14,7 @@ public:
   vector<MatchedNode *> children;
 
   MatchedNode(NodeBase *dom_node, PropertyMap &values);
+  MatchedNode();
   ~MatchedNode();
 
   string to_string() const;

@@ -72,7 +72,7 @@ unsigned int SimpleSelector::specificity() const {
   return specificity;
 }
 
-static int rule_specificity(Rule &rule) {
+int rule_specificity(Rule &rule) {
   int specificity = 0;
   for (SimpleSelector selector : rule.selectors) {
     specificity += selector.specificity();
@@ -80,11 +80,11 @@ static int rule_specificity(Rule &rule) {
   return specificity;
 }
 
-static string dec_to_string(Declaration &dec) {
+string dec_to_string(Declaration &dec) {
   return "{" + dec.property + " : " + dec.value->to_string() + "}";
 }
 
-static string rule_to_string(Rule &rule) {
+string rule_to_string(Rule &rule) {
   string res = "{";
   res += "selectors: [";
 

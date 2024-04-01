@@ -11,6 +11,9 @@ using namespace std;
 
 enum TypeEnum { ELEMENT, TEXT };
 
+typedef unordered_map<string, string> AttributeMap;
+typedef unordered_set<string> ClassSet;
+
 class NodeBase {
 
 public:
@@ -21,6 +24,9 @@ public:
   virtual ~NodeBase();
 
   virtual string to_string() const;
+  virtual string get_tag() const;
+  virtual optional<string> get_id() const;
+  virtual optional<ClassSet> get_classes() const;
 
   static void print(NodeBase *node);
   static void free_node(NodeBase *node);
@@ -36,9 +42,6 @@ public:
   string to_string() const override;
 };
 
-typedef unordered_map<string, string> AttributeMap;
-typedef unordered_set<string> ClassSet;
-
 class ElementNode : public NodeBase {
 public:
   string tag;
@@ -49,8 +52,9 @@ public:
   ~ElementNode();
 
   string to_string() const override;
-  optional<ClassSet> get_classes() const;
-  optional<string> get_id() const;
+  string get_tag() const override;
+  optional<ClassSet> get_classes() const override;
+  optional<string> get_id() const override;
 };
 
 NodeBase *html_parse(const string &input);

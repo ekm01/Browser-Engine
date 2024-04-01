@@ -7,6 +7,12 @@ NodeBase::~NodeBase() {}
 
 string NodeBase::to_string() const { return ""; }
 
+optional<ClassSet> NodeBase::get_classes() const { return {}; }
+
+optional<string> NodeBase::get_id() const { return {}; }
+
+string NodeBase::get_tag() const { return ""; }
+
 // BFS to print the DOM tree
 void NodeBase::print(NodeBase *node) {
   if (NULL == node) {
@@ -72,6 +78,16 @@ string ElementNode::to_string() const {
          "}";
 }
 
+string ElementNode::get_tag() const { return this->tag; }
+
+optional<string> ElementNode::get_id() const {
+  auto it = this->attributes.find("id");
+  if (this->attributes.end() == it) {
+    return {};
+  }
+  return it->second;
+}
+
 optional<ClassSet> ElementNode::get_classes() const {
   auto it = this->attributes.find("class");
 
@@ -88,11 +104,4 @@ optional<ClassSet> ElementNode::get_classes() const {
     class_set.insert(class_name);
   }
   return class_set;
-}
-optional<string> ElementNode::get_id() const {
-  auto it = this->attributes.find("id");
-  if (this->attributes.end() == it) {
-    return {};
-  }
-  return it->second;
 }

@@ -78,6 +78,8 @@ struct Stylesheet {
   vector<Rule> rules;
 };
 
+int rule_specificity(Rule &rule);
+string rule_to_string(Rule &rule);
 string stylesheet_to_string(Stylesheet &stylesheet);
 void free_values(Stylesheet &stylesheet);
 Stylesheet css_parse(const string &input);

@@ -64,7 +64,6 @@ void MatchedNode::free_node(MatchedNode *node) {
 }
 
 static int match_element_selector(NodeBase *element, SimpleSelector &selector) {
-
   if (selector.tag.value_or(element->get_tag()) != element->get_tag()) {
     return 0;
   }
@@ -89,7 +88,6 @@ static int match_element_selector(NodeBase *element, SimpleSelector &selector) {
              !element_classes.has_value()) {
     return 0;
   }
-
   return 1;
 }
 
@@ -108,6 +106,7 @@ static vector<Rule> match_rule(NodeBase *element, Stylesheet &css) {
 
 static PropertyMap create_map(NodeBase *element, Stylesheet &css) {
   PropertyMap map = {};
+  // More specific to less specific order in matched rules
   vector<Rule> matched_rules = match_rule(element, css);
 
   int i = 0;
@@ -115,6 +114,7 @@ static PropertyMap create_map(NodeBase *element, Stylesheet &css) {
     Rule rule = matched_rules.back();
     matched_rules.pop_back();
     for (Declaration dec : rule.declarations) {
+      // More specific ones will overwrite less specific
       map[dec.property] = dec.value;
     }
     ++i;

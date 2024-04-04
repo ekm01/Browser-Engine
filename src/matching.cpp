@@ -134,15 +134,21 @@ static void match_aux(NodeBase *dom, Stylesheet &css, MatchedNode *res) {
       res->children.push_back(node);
     }
   }
-  if (ELEMENT == dom->type_enum) {
-    PropertyMap map = create_map(dom, css);
-    res->dom_node = dom;
-    res->values = map;
-  }
+  PropertyMap map = create_map(dom, css);
+  res->dom_node = dom;
+  res->values = map;
 }
 
 MatchedNode *match(NodeBase *dom, Stylesheet &css) {
   MatchedNode *root = new MatchedNode();
+
+  // If DOM is nothing but a text, return instantly
+  if (TEXT == dom->type_enum) {
+    root->dom_node = dom;
+    return root;
+  }
+
+  // Begin processing Matchtree
   match_aux(dom, css, root);
   return root;
 }

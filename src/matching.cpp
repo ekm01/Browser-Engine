@@ -8,6 +8,35 @@ MatchedNode::MatchedNode(NodeBase *dom_node, PropertyMap &values)
 MatchedNode::MatchedNode() {}
 MatchedNode::~MatchedNode() {}
 
+optional<Value *> MatchedNode::get_value(const string &name) const {
+  auto it = this->values.find(name);
+  if (this->values.end() == it) {
+    return {};
+  }
+  return it->second;
+}
+
+optional<Display> MatchedNode::get_display() const {
+  optional<Value *> value = this->get_value("display");
+  if (value.has_value()) {
+    Keyword *keyword = dynamic_cast<Keyword *>(value.value());
+    if (keyword == nullptr) {
+      return {};
+    }
+
+    if (keyword->keyword == "block") {
+      return Display::BLOCK;
+    } else if (keyword->keyword == "none") {
+      return Display::NONE;
+    } else {
+      return Display::INLINE;
+    }
+
+  } else {
+    return Display::INLINE;
+  }
+}
+
 string MatchedNode::to_string() const {
   string result =
       "{dom_node: " + this->dom_node->to_string() + ", property map: [";

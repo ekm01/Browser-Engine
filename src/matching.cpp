@@ -16,12 +16,12 @@ optional<Value *> MatchedNode::get_value(const string &name) const {
   return it->second;
 }
 
-optional<Display> MatchedNode::get_display() const {
+Display MatchedNode::get_display() const {
   optional<Value *> value = this->get_value("display");
   if (value.has_value()) {
     Keyword *keyword = dynamic_cast<Keyword *>(value.value());
     if (keyword == nullptr) {
-      return {};
+      return Display::INLINE;
     }
 
     if (keyword->keyword == "block") {
@@ -182,7 +182,7 @@ MatchedNode *match(NodeBase *dom, Stylesheet &css) {
   return root;
 }
 
-int main() {
+/*int main() {
   NodeBase *dom = html_parse("examples/html/test.html");
   Stylesheet css = css_parse("examples/css/test.css");
   NodeBase::print(dom);
@@ -195,4 +195,4 @@ int main() {
   NodeBase::free_node(dom);
   MatchedNode::free_node(res);
   return 0;
-}
+}*/

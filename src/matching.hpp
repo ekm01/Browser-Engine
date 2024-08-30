@@ -21,10 +21,12 @@ public:
   ~MatchedNode();
 
   optional<Value *> get_value(const string &name) const;
-  optional<Display> get_display() const;
+  Display get_display() const;
   string to_string() const;
   static void print(MatchedNode *node);
   static void free_node(MatchedNode *node);
 };
+
+MatchedNode *match(NodeBase *dom, Stylesheet &css);
 
 #endif // !MATCHING_HPP

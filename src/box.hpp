@@ -32,8 +32,12 @@ public:
   MatchedNode *matched_node;
   vector<BoxNode *> children;
 
-  BoxNode();
+  BoxNode *anonymous_boxing();
+
+  BoxNode(BoxType boxtype);
   ~BoxNode();
 };
+
+BoxNode *build_boxes(MatchedNode *matched_node);
 
 #endif // !BOX_HPP

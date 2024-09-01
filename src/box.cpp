@@ -22,21 +22,20 @@ BoxNode::BoxNode(BoxType boxtype) : type(boxtype) {
 }
 BoxNode::~BoxNode() {}
 
-BoxNode *BoxNode::anonymous_boxing() {
-  if (this->type == INLINE_BOX or this->type == ANONYMOUS) {
-    return this;
-  } else {
-    BoxNode *child = this->children.back();
-    if (child != nullptr) {
-      this->children.push_back(new BoxNode(ANONYMOUS));
+BoxNode *BoxNode::anonymous_boxing(Display child_type) {
+  if (this->type != child_type) {
+    if (!this->children.empty() && this->children.back()->type == ANONYMOUS) {
+      return this->children.back();
     }
-    return this->children.back();
+    BoxNode *anon = new BoxNode(ANONYMOUS);
+    this->children.push_back(anon);
+    return anon;
   }
+  return this;
 }
 
 BoxNode *build_boxes(MatchedNode *matched_node) {
   BoxNode *root;
-  // cout << endl << matched_node->get_display() << endl;
   switch (matched_node->get_display()) {
   case INLINE:
     root = new BoxNode(INLINE_BOX);
@@ -51,15 +50,9 @@ BoxNode *build_boxes(MatchedNode *matched_node) {
   }
 
   for (MatchedNode *child : matched_node->children) {
-    switch (child->get_display()) {
-    case INLINE:
-      root->anonymous_boxing()->children.push_back(build_boxes(child));
-      break;
-    case BLOCK:
-      root->children.push_back(build_boxes(child));
-      break;
-    default:
-      break;
+    Display display = child->get_display();
+    if (display == INLINE || display == BLOCK) {
+      root->anonymous_boxing(display)->children.push_back(build_boxes(child));
     }
   }
   return root;
@@ -73,10 +66,8 @@ int main() {
   //  cout << stylesheet_to_string(css) << endl;
 
   MatchedNode *res = match(dom, css);
-  MatchedNode::print(res);
-  //  BoxNode *ress = build_boxes(res);
-  //  MatchedNode::print(ress->children[1]->children[0]->matched_node);
-  //  cout << ress->children[1]->children[0]->type << endl;
+  BoxNode *ress = build_boxes(res);
+  MatchedNode::print(ress->matched_node);
   free_values(css);
   NodeBase::free_node(dom);
   MatchedNode::free_node(res);

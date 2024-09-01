@@ -32,7 +32,7 @@ public:
   MatchedNode *matched_node;
   vector<BoxNode *> children;
 
-  BoxNode *anonymous_boxing();
+  BoxNode *anonymous_boxing(Display child_type);
 
   BoxNode(BoxType boxtype);
   ~BoxNode();

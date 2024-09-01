@@ -69,12 +69,14 @@ int main() {
   NodeBase *dom = html_parse("examples/html/test.html");
   Stylesheet css = css_parse("examples/css/test.css");
   // NodeBase::print(dom);
-  // cout << "\n\n" << endl;
-  // cout << stylesheet_to_string(css) << endl;
+  //  cout << "\n\n" << endl;
+  //  cout << stylesheet_to_string(css) << endl;
 
   MatchedNode *res = match(dom, css);
-  BoxNode *ress = build_boxes(res);
-  MatchedNode::print(ress->matched_node);
+  MatchedNode::print(res);
+  //  BoxNode *ress = build_boxes(res);
+  //  MatchedNode::print(ress->children[1]->children[0]->matched_node);
+  //  cout << ress->children[1]->children[0]->type << endl;
   free_values(css);
   NodeBase::free_node(dom);
   MatchedNode::free_node(res);

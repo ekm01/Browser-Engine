@@ -135,6 +135,9 @@ static vector<Rule> match_rule(NodeBase *element, Stylesheet &css) {
 
 static PropertyMap create_map(NodeBase *element, Stylesheet &css) {
   PropertyMap map = {};
+  if (TEXT == element->type_enum) {
+    return map;
+  }
   // More specific to less specific order in matched rules
   vector<Rule> matched_rules = match_rule(element, css);
 
@@ -157,11 +160,9 @@ static void match_aux(NodeBase *dom, Stylesheet &css, MatchedNode *res) {
   }
 
   for (int i = 0; i < dom->children.size(); ++i) {
-    if (ELEMENT == dom->children[i]->type_enum) {
-      MatchedNode *node = new MatchedNode();
-      match_aux(dom->children[i], css, node);
-      res->children.push_back(node);
-    }
+    MatchedNode *node = new MatchedNode();
+    match_aux(dom->children[i], css, node);
+    res->children.push_back(node);
   }
   PropertyMap map = create_map(dom, css);
   res->dom_node = dom;

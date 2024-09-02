@@ -1,6 +1,5 @@
 #include "box.hpp"
 #include "matching.hpp"
-#include <iostream>
 #include <string>
 
 BoxNode::BoxNode(BoxType boxtype) : type(boxtype) {
@@ -23,9 +22,11 @@ BoxNode::BoxNode(BoxType boxtype) : type(boxtype) {
 BoxNode::~BoxNode() {}
 
 BoxNode *BoxNode::anonymous_boxing(Display child_type) {
-  if (this->type != child_type) {
-    if (!this->children.empty() && this->children.back()->type == ANONYMOUS) {
-      return this->children.back();
+  if (static_cast<int>(this->type) != static_cast<int>(child_type)) {
+    for (BoxNode *node : this->children) {
+      if (node->type == ANONYMOUS) {
+        return node;
+      }
     }
     BoxNode *anon = new BoxNode(ANONYMOUS);
     this->children.push_back(anon);

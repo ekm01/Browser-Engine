@@ -6,7 +6,13 @@
 Value::~Value() {}
 string Value::to_string() const { return ""; }
 
-float Value::to_px() const { return 0.0; }
+float Value::to_px() {
+  Length *length = dynamic_cast<Length *>(this);
+  if (length == nullptr) {
+    return 0.0;
+  }
+  return length->length;
+}
 
 Keyword::Keyword(string &keyword) : keyword(keyword) {}
 Keyword::~Keyword(){};

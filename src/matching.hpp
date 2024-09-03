@@ -21,6 +21,8 @@ public:
   ~MatchedNode();
 
   optional<Value *> get_value(const string &name) const;
+  Value *get_value_fallback(const string &name, const string &fallback,
+                            Value *default_value) const;
   Display get_display() const;
   string to_string() const;
   static void print(MatchedNode *node);

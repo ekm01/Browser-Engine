@@ -11,7 +11,7 @@ class Value {
 public:
   virtual ~Value();
 
-  virtual float to_px() const;
+  virtual float to_px();
   virtual string to_string() const;
 };
 

@@ -3,22 +3,10 @@
 #include <string>
 
 BoxNode::BoxNode(BoxType boxtype) : type(boxtype) {
-  Area area;
-  Edge edge;
-  Rectangle rect;
-  rect.x = 0.0;
-  rect.y = 0.0;
-  rect.width = 0.0;
-  rect.height = 0.0;
-  edge.top = 0.0;
-  edge.bottom = 0.0;
-  edge.left = 0.0;
-  edge.right = 0.0;
-  area.border = edge;
-  area.margin = edge;
-  area.padding = edge;
-  area.content = rect;
-  this->area = area;
+  this->area.border = {0.0, 0.0, 0.0, 0.0};
+  this->area.margin = this->area.border;
+  this->area.padding = this->area.border;
+  this->area.content = {0.0, 0.0, 0.0, 0.0};
 }
 BoxNode::~BoxNode() {}
 

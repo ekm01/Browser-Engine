@@ -16,6 +16,20 @@ optional<Value *> MatchedNode::get_value(const string &name) const {
   return it->second;
 }
 
+Value *MatchedNode::get_value_fallback(const string &name,
+                                       const string &fallback,
+                                       Value *default_value) const {
+  optional<Value *> opt_name = this->get_value(name);
+  if (opt_name.has_value()) {
+    return opt_name.value();
+  }
+  optional<Value *> opt_fallback = this->get_value(fallback);
+  if (opt_fallback.has_value()) {
+    return opt_fallback.value();
+  }
+  return default_value;
+}
+
 Display MatchedNode::get_display() const {
   optional<Value *> value = this->get_value("display");
   if (value.has_value()) {

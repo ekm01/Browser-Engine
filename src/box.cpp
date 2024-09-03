@@ -18,6 +18,7 @@ BoxNode::BoxNode(BoxType boxtype) : type(boxtype) {
   area.margin = edge;
   area.padding = edge;
   area.content = rect;
+  this->area = area;
 }
 BoxNode::~BoxNode() {}
 
